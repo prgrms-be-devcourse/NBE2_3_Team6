@@ -18,7 +18,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id") //  기본 키
+    @Column(name = "member_id") //  기본 키 코틀린 마이그레이션 전 소스트리 테스트
     private Long memberId;
 
     @NotNull
