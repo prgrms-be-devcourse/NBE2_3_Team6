@@ -1,3 +1,4 @@
+/*
 package com.example.filmpass.entity;
 
 import com.example.filmpass.entity.Payment;
@@ -14,11 +15,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Member {
+public class Member2 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id") //  기본 키 코틀린 마이그레이션 전 소스트리 테스트
+    @Column(name = "member_id") //  기본 키
     private Long memberId;
 
     @NotNull
@@ -50,3 +51,4 @@ public class Member {
     private Long point; // 포인트 필드 추가
 
 }
+*/
