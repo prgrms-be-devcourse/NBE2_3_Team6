@@ -1,11 +1,7 @@
 package com.example.filmpass.dto
 
-import lombok.Getter
-import lombok.Setter
+data class MemberLoginDto(
+    val id: String?, // 사용자 ID
+    val password: String? // 비밀번호
+)
 
-@Getter
-@Setter
-class MemberLoginDto {
-    private val id: String? = null // 사용자 ID
-    private val password: String? = null // 비밀번호
-}
