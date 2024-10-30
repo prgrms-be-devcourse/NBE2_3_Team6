@@ -1,13 +1,10 @@
-package com.example.filmpass.dto;
+package com.example.filmpass.dto
 
-import lombok.Data;
-
-@Data
-public class SeatRequest {
-    private Long cinemaMovieId;
-    private Long cinemaId;
+data class SeatRequest (
+    val cinemaMovieId: Long? = null,
+    val cinemaId: Long? = null,
 
     //좌석 하나하나
-    private int rows;
-    private int cols;
-}
+    val rows:Int = 0,
+    val cols:Int = 0
+)

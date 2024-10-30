@@ -6,7 +6,7 @@ import jakarta.persistence.*
 @Table(name = "seat")
 data class Seat(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val seatId: Long,
+        val seatId: Long? = null,
         val seatRow:Int,
         val seatCol:Int,
 
