@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reserveId;
+    public Long reserveId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -34,9 +34,9 @@ public class Reservation {
     @JoinColumn(name = "seat_id")
     private Seat seat;
 
-    private int adult;
+    public int adult;
 
-    private int child;
+    public int child;
 
-    private int youth;
+    public int youth;
 }

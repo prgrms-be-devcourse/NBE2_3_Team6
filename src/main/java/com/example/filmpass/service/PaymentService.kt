@@ -10,13 +10,13 @@ import com.example.filmpass.repository.PaymentRepository
 import com.example.filmpass.repository.ReservationRepository
 import com.example.filmpass.util.RefundStatus
 import com.fasterxml.jackson.databind.ObjectMapper
-import lombok.AllArgsConstructor
 import lombok.extern.log4j.Log4j2
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.json.simple.JSONObject
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -29,14 +29,16 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Service
-class PaymentService {
+@Log4j2
+class PaymentService @Autowired constructor(
+    private val paymentRepository: PaymentRepository,
+    private val reservationRepository: ReservationRepository,
     private val objectMapper: ObjectMapper? = null
-    private val paymentRepository: PaymentRepository? = null
-    private val reservationRepository: ReservationRepository? = null
-
+    ){
     //결제 요청 메서드 - 결제 요청하는 토스 API이용
     fun payment(paymentDTO: PaymentDTO): ResponseEntity<String?>? {
-        var url: URL? = null
+        log.info("PaymentDTO----------" + paymentDTO.reserveId );
+        val url: URL
         val responseBody = StringBuilder()
         try {
             url = URL("https://pay.toss.im/api/v2/payments")
@@ -46,10 +48,10 @@ class PaymentService {
             connection.doInput = true
 
             //예매 정보 있는지 확인
-            val reservation = reservationRepository!!.findByReserveId(paymentDTO.ReserveId)
+            val reservation = reservationRepository.findByReserveId(paymentDTO.reserveId)
 
             //결제 정보 있는지 확인
-            val payment1 = paymentRepository!!.findByReservation(reservation)
+            val payment1 = paymentRepository.findByReservation(reservation)
 
 
             //예매 정보 없을 경우
@@ -72,11 +74,11 @@ class PaymentService {
                 } else {
                     jsonBody["amount"] = "5000"
                 }
-                jsonBody["amountTaxFree"] = paymentDTO.amountTaxFree
-                jsonBody["productDesc"] = paymentDTO.productDesc
+                jsonBody["amountTaxFree"] = 0
+                jsonBody["productDesc"] = "영화 예매"
                 jsonBody["apiKey"] = "sk_test_w5lNQylNqa5lNQe013Nq"
                 jsonBody["autoExecute"] = true
-                jsonBody["resultCallback"] = paymentDTO.resultCallback
+                jsonBody["resultCallback"] = ""
                 jsonBody["retUrl"] = "http://localhost:8080/pay/return"
                 jsonBody["retCancelUrl"] = "http://localhost:8080/pay/cancel"
 

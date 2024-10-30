@@ -8,7 +8,7 @@ import lombok.extern.log4j.Log4j2
 
 
 class PaymentDTO {
-    val ReserveId: Long? = null //예매번호
+    val reserveId: Long? = null //예매번호
     val apiKey: String? = null //가맹점 Key
     val productDesc: String? = null //상품 설명
     val retUrl: String? = null //구매자 인증 완료 후 연결할 웹페이지
