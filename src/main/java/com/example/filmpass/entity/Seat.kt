@@ -1,34 +1,23 @@
 package com.example.filmpass.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "seat")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Seat {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long seatId;
+data class Seat(
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+        val seatId: Long,
+        val seatRow:Int,
+        val seatCol:Int,
 
-    private int seatRow;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "cinema_id")
+        val cinema: Cinema? = null,
 
-    private int seatCol;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "cinema_movie_id")
+        val cinemaMovie: CinemaMovie? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cinema_id")
-    private Cinema cinema;
+        val isReserved : Boolean=false
+)
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cinema_movie_id")
-    private CinemaMovie cinemaMovie;
-
-    private boolean isReserved;
-
-}
