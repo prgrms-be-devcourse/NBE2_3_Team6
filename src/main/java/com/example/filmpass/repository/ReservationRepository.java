@@ -2,6 +2,7 @@ package com.example.filmpass.repository;
 
 import com.example.filmpass.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 

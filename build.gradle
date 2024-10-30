@@ -2,7 +2,9 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
-    id 'org.jetbrains.kotlin.jvm'
+	id 'org.jetbrains.kotlin.jvm' version '1.9.25'
+	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
+	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
 }
 
 group = 'com.example'
@@ -56,7 +58,6 @@ dependencies {
 
 	//json-simple 의존성
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 }
 
