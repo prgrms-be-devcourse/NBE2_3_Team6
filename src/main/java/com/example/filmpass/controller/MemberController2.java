@@ -1,3 +1,4 @@
+/*
 package com.example.filmpass.controller;
 
 import com.example.filmpass.dto.MemberLoginDto;
@@ -81,3 +82,4 @@ public class MemberController {
         }
     }
 }
+*/
