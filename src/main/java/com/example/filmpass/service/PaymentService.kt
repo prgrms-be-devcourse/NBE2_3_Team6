@@ -10,13 +10,14 @@ import com.example.filmpass.repository.PaymentRepository
 import com.example.filmpass.repository.ReservationRepository
 import com.example.filmpass.util.RefundStatus
 import com.fasterxml.jackson.databind.ObjectMapper
-import lombok.extern.log4j.Log4j2
-import org.hibernate.query.sqm.tree.SqmNode.log
+import lombok.AllArgsConstructor
+import lombok.RequiredArgsConstructor
 import org.json.simple.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -28,16 +29,15 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+@Transactional
 @Service
-@Log4j2
-class PaymentService @Autowired constructor(
+class PaymentService (
     private val paymentRepository: PaymentRepository,
     private val reservationRepository: ReservationRepository,
-    private val objectMapper: ObjectMapper? = null
+    private val objectMapper: ObjectMapper
     ){
     //결제 요청 메서드 - 결제 요청하는 토스 API이용
     fun payment(paymentDTO: PaymentDTO): ResponseEntity<String?>? {
-        log.info("PaymentDTO----------" + paymentDTO.reserveId );
         val url: URL
         val responseBody = StringBuilder()
         try {
@@ -163,8 +163,8 @@ class PaymentService @Autowired constructor(
             //랜덤 값 만들었으므로 예매 번호만 뽑아내기
             val substring = reserveId.substring(0, reserveId.indexOf("m"))
 
-            val reservation = reservationRepository!!.findByReserveId(substring.toLong())
-            val payment = paymentRepository!!.findByReservation(reservation)
+            val reservation = reservationRepository.findByReserveId(substring.toLong())
+            val payment = paymentRepository.findByReservation(reservation)
             if (payment != null) {
                 payment.status = PayStatus.PAY_COMPLETE
                 payment.paidTs = paidTs
@@ -196,15 +196,17 @@ class PaymentService @Autowired constructor(
     //결제 취소 메서드 - 상태 결제 취소로 바뀌도록
     fun payCancle() {
         val reservation = lastOrder
-        val payment = paymentRepository!!.findByReservation(reservation)
+        val payment = paymentRepository.findByReservation(reservation)
         if (payment != null) {
             payment.status = PayStatus.PAY_CANCEL
+            println("Payment status updated to: ${payment.status}") // 로그 추가
+
         }
     }
 
     val lastOrder: Reservation?
         get() {
-            val payment = paymentRepository?.findTopByOrderByCreatedTsDesc()?.orElse(null)
+            val payment = paymentRepository.findTopByOrderByCreatedTsDesc()?.orElse(null)
             return payment?.reservation
         }
 
@@ -213,9 +215,9 @@ class PaymentService @Autowired constructor(
         try {
             // reserveId로 예매 정보 조회
 
-            val reservation = reservationRepository!!.findByReserveId(refundDTO.reserveId)
+            val reservation = reservationRepository.findByReserveId(refundDTO.reserveId)
             //결제 정보 조회
-            val payment = paymentRepository!!.findByReservation(reservation)
+            val payment = paymentRepository.findByReservation(reservation)
 
 
             //예매 정보가 존재하지 않을 경우

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/pay")
-class PaymentController @Autowired constructor(
+class PaymentController(
     private val paymentService: PaymentService
 ){
 
