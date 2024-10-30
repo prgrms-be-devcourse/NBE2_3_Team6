@@ -1,3 +1,4 @@
+/*
 package com.example.filmpass.dto;
 
 import lombok.Getter;
@@ -13,3 +14,4 @@ public class MemberSignupDto {
     private String image; // 프로필 사진
     private String role; // 권한
 }
+*/
