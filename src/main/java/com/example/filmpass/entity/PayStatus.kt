@@ -1,6 +1,6 @@
-package com.example.filmpass.entity;
+package com.example.filmpass.entity
 
-public enum PayStatus {
+enum class PayStatus {
     PAY_STANDBY,
     PAY_APPROVED,
     PAY_CANCEL,
