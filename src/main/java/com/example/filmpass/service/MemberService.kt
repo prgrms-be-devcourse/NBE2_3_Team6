@@ -4,7 +4,6 @@ import com.example.filmpass.dto.MemberSignupDto
 import com.example.filmpass.entity.Member
 import com.example.filmpass.jwt.JwtUtil
 import com.example.filmpass.repository.MemberRepository
-import lombok.extern.log4j.Log4j2
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -12,9 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.util.function.Supplier
 
-@Log4j2
 @Service
 class MemberService(
     private val memberRepository: MemberRepository,
@@ -25,29 +22,25 @@ class MemberService(
     // 사용자 정보 가져오기
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val member = memberRepository.findById(username.toLongOrNull() ?: throw RuntimeException("Invalid ID")).orElseThrow {
+        val member = memberRepository.findByEmail(username).orElseThrow {
             UsernameNotFoundException("User not found")
         }
-        return User(member.id, member.password, ArrayList<GrantedAuthority>())
+        return User(member.id ?: "", member.password ?: "", ArrayList<GrantedAuthority>())
     }
-
 
     // 회원가입
     fun signup(memberSignupDto: MemberSignupDto) {
         // 중복 체크
-        if (memberRepository.existsById(memberSignupDto.id)) {
-            throw RuntimeException("User ID already exists")
-        }
-        if (memberRepository.existsByEmail(memberSignupDto.email)) {
+        if (memberRepository.findByEmail(memberSignupDto.email ?: throw RuntimeException("Email is required")).isPresent) {
             throw RuntimeException("Email already exists")
         }
-        if (memberRepository.existsByNumber(memberSignupDto.number)) {
+        if (memberRepository.findByNumber(memberSignupDto.number ?: throw RuntimeException("Phone number is required")).isPresent) {
             throw RuntimeException("Phone number already exists")
         }
 
         val member = Member().apply {
-            password = passwordEncoder.encode(memberSignupDto.password)
-            id = memberSignupDto.id
+            password = passwordEncoder.encode(memberSignupDto.password ?: throw RuntimeException("Password is required"))
+            id = memberSignupDto.id ?: throw RuntimeException("ID is required")
             email = memberSignupDto.email
             number = memberSignupDto.number
             image = memberSignupDto.image ?: "default_image.png"
@@ -63,15 +56,15 @@ class MemberService(
     }
 
     // 로그인
-    fun login(id: String, password: String?): Map<String, String> {
-        val userDetails = loadUserByUsername(id)
+    fun login(email: String, password: String?): Map<String, String> {
+        val userDetails = loadUserByUsername(email)
 
         if (passwordEncoder.matches(password, userDetails.password)) {
-            val token = jwtUtil.generateToken(id)
-            val refreshToken = jwtUtil.generateRefreshToken(id)
+            val token = jwtUtil.generateToken(email)
+            val refreshToken = jwtUtil.generateRefreshToken(email)
 
             // 리프레시 토큰을 DB에 저장
-            val member = memberRepository.findById(id).orElseThrow {
+            val member = memberRepository.findByEmail(email).orElseThrow {
                 UsernameNotFoundException("User not found")
             }
             member.refreshToken = refreshToken // 리프레시 토큰 설정
@@ -84,9 +77,11 @@ class MemberService(
     }
 
     // 이미지 업데이트
-    fun updateProfileImage(id: String?, newImage: String?) {
-        val member = memberRepository.findById(id).orElseThrow(Supplier { UsernameNotFoundException("User not found") })
-        member.image = newImage // 새로운 이미지로 업데이트
-        memberRepository.save(member) // 변경 사항 저장
+    fun updateProfileImage(email: String, newImage: String) {
+        val member = memberRepository.findByEmail(email).orElseThrow {
+            RuntimeException("User not found")
+        }
+        member.image = newImage
+        memberRepository.save(member)
     }
 }

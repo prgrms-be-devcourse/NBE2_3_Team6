@@ -13,7 +13,7 @@ import java.util.function.Function
 @Component
 class JwtUtil {
     @Value("\${jwt.secret}")
-    private val SECRET_KEY: String? = null
+    private lateinit var SECRET_KEY: String
 
     // JWT에서 사용자 이름 추출
     fun extractUsername(token: String?): String {
@@ -47,17 +47,13 @@ class JwtUtil {
 
     // 엑세스 토큰 생성
     fun generateToken(username: String): String {
-        val currentTimeMillis = System.currentTimeMillis()
-
-        // 현재 시간을 KST 기준으로 출력
         val nowKST = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
         println("Current Time (KST - JWT Generation): $nowKST")
-        println("JWT 만료 시간 (KST): " + nowKST.plusHours(1)) // 만료 시간을 1시간 후로 출력
+        println("JWT 만료 시간 (KST): " + nowKST.plusHours(1))
 
         val claims: Map<String, Any?> = HashMap()
-        return createToken(claims, username, 1, false) // 1시간 동안 유효한 액세스 토큰
+        return createToken(claims, username, 1, false)
     }
-
 
     // 리프레시 토큰 생성 (30일 유효)
     fun generateRefreshToken(username: String): String {
@@ -72,12 +68,12 @@ class JwtUtil {
         duration: Int,
         isRefreshToken: Boolean
     ): String {
-        val now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")) // 한국 시간대(KST) 사용
-        val issuedAt = Date.from(now.toInstant()) // 발급 시간
-        var expiration = Date.from(now.plusHours(duration.toLong()).toInstant()) // 만료 시간 (시간 단위)
+        val now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+        val issuedAt = Date.from(now.toInstant())
+        var expiration = Date.from(now.plusHours(duration.toLong()).toInstant())
 
         if (isRefreshToken) {
-            expiration = Date.from(now.plusDays(duration.toLong()).toInstant()) // 리프레시 토큰은 일 단위
+            expiration = Date.from(now.plusDays(duration.toLong()).toInstant())
         }
 
         return Jwts.builder()
