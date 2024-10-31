@@ -4,7 +4,6 @@ import com.example.filmpass.dto.MemberSignupDto
 import com.example.filmpass.entity.Member
 import com.example.filmpass.jwt.JwtUtil
 import com.example.filmpass.repository.MemberRepository
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -12,6 +11,11 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.UUID
 
 @Service
 class MemberService(
@@ -75,12 +79,24 @@ class MemberService(
         }
     }
 
-    // 이미지 업데이트
-    fun updateProfileImage(id: String, newImage: String) {
-        val member = memberRepository.findById(id).orElseThrow {
-            RuntimeException("User not found")
-        }
-        member.image = newImage
+    // 이미지 파일 저장
+    fun saveProfileImage(imageFile: MultipartFile): String {
+        // 파일 이름 생성 (UUID 사용)
+        val fileName = UUID.randomUUID().toString() + "_" + imageFile.originalFilename
+        val uploadDir = "C:\\Users\\sumin\\Desktop\\changeimage" // 이미지 파일을 저장할 경로
+        val filePath: Path = Paths.get(uploadDir, fileName)
+
+        // 파일 저장
+        Files.copy(imageFile.inputStream, filePath)
+
+        // 파일 URL 반환 (필요에 따라 조정)
+        return "/images/$fileName" // 웹에서 접근할 수 있는 URL 형태로 조정
+    }
+
+    // 프로필 이미지 업데이트
+    fun updateProfileImage(id: String, imageUrl: String) {
+        val member = findById(id)
+        member.image = imageUrl
         memberRepository.save(member)
     }
 }

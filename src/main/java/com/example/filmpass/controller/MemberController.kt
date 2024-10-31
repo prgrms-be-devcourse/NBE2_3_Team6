@@ -3,7 +3,6 @@ package com.example.filmpass.controller
 import com.example.filmpass.dto.MemberLoginDto
 import com.example.filmpass.dto.MemberSignupDto
 import com.example.filmpass.dto.MemberUpdateDto
-import com.example.filmpass.entity.Member
 import com.example.filmpass.jwt.JwtUtil
 import com.example.filmpass.service.MemberService
 import jakarta.servlet.http.Cookie
@@ -35,7 +34,7 @@ class MemberController(
         @Valid @RequestBody memberLoginDto: MemberLoginDto,
         response: HttpServletResponse
     ): ResponseEntity<String> {
-        try {
+        return try {
             val authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken(memberLoginDto.id, memberLoginDto.password)
             )
@@ -55,39 +54,32 @@ class MemberController(
             refreshCookie.maxAge = 60 * 60 * 24 * 30 // 30일
             response.addCookie(refreshCookie)
 
-            return ResponseEntity.ok("Login successful")
+            ResponseEntity.ok("Login successful")
         } catch (e: Exception) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패")
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ${e.message}")
         }
     }
 
-    @PutMapping("/profile-image")
+    @PutMapping("/profile-image", consumes = ["multipart/form-data"])
     fun updateProfileImage(
-        @RequestBody memberUpdateDto: MemberUpdateDto,
+        @ModelAttribute memberUpdateDto: MemberUpdateDto,
         request: HttpServletRequest
     ): ResponseEntity<String> {
         // JWT에서 사용자 ID 추출
         val jwt = request.getHeader("Authorization")?.substring(7) // "Bearer " 부분 제거
-        val id = jwtUtil.extractId(jwt ?: "")
+        val id = jwtUtil.extractId(jwt ?: "") ?: return ResponseEntity.badRequest().body("Invalid token: ID not found")
 
-        // id가 null일 경우 에러 응답 반환
-        if (id == null) {
-            return ResponseEntity.badRequest().body("Invalid token: ID not found")
+        val imageFile = memberUpdateDto.image
+        if (imageFile == null) {
+            return ResponseEntity.badRequest().body("Image file cannot be null")
         }
 
-        // 새로운 이미지 URL 가져오기
-        val newImage = memberUpdateDto.image
-        if (newImage == null) {
-            return ResponseEntity.badRequest().body("Image URL cannot be null")
-        }
-
-        // 프로필 이미지 업데이트
-        memberService.updateProfileImage(id, newImage)
+        // 이미지 파일 처리 및 업데이트
+        val imageUrl = memberService.saveProfileImage(imageFile)
+        memberService.updateProfileImage(id, imageUrl)
 
         return ResponseEntity.ok("Profile image updated successfully")
     }
-
-
 
     @PostMapping("/refresh-token")
     fun refreshToken(
