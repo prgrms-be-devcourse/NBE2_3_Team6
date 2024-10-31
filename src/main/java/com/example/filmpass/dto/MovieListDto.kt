@@ -1,24 +1,14 @@
-package com.example.filmpass.dto;
+package com.example.filmpass.dto
 
-import com.example.filmpass.entity.CinemaMovie;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.example.filmpass.entity.CinemaMovie
 
-import java.util.List;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class MovieListDto {
-    private String title;
-
-    private List<CinemaMovieDto> info;
-
-    public MovieListDto(Long id, CinemaMovie movieName,List<CinemaMovieDto> infoDto) {
-        this.title = movieName.getMovie().getMovieName();
-        this.info = infoDto;
-    }
-
-
+data class MovieListDto(
+    val title: String? = null,
+    val info: List<CinemaMovieDto>? = null
+) {
+    // 보조 생성자 제공
+    constructor(id: Long, movieName: CinemaMovie, infoDto: List<CinemaMovieDto>) : this(
+        title = movieName.movie?.movieName,
+        info = infoDto
+    )
 }

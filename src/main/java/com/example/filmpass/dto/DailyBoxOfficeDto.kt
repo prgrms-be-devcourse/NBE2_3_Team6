@@ -1,25 +1,22 @@
-package com.example.filmpass.dto;
+package com.example.filmpass.dto
 
-import lombok.Data;
-
-@Data
-public  class DailyBoxOfficeDto {
-    private String rnum;
-    private String rank;
-    private String rankInten;
-    private String rankOldAndNew;
-    private String movieCd;
-    private String movieNm;
-    private String openDt;
-    private String salesAmt;
-    private String salesShare;
-    private String salesInten;
-    private String salesChange;
-    private String salesAcc;
-    private String audiCnt;
-    private String audiInten;
-    private String audiChange;
-    private String audiAcc;
-    private String scrnCnt;
-    private String showCnt;
-}
+data class DailyBoxOfficeDto(
+    val rnum: String? = null,
+    val rank: String? = null,
+    val rankInten: String? = null,
+    val rankOldAndNew: String? = null,
+    val movieCd: String? = null,
+    val movieNm: String? = null,
+    val openDt: String? = null,
+    val salesAmt: String? = null,
+    val salesShare: String? = null,
+    val salesInten: String? = null,
+    val salesChange: String? = null,
+    val salesAcc: String? = null,
+    val audiCnt: String? = null,
+    val audiInten: String? = null,
+    val audiChange: String? = null,
+    val audiAcc: String? = null,
+    val scrnCnt: String? = null,
+    val showCnt: String? = null
+)

@@ -1,21 +1,11 @@
-package com.example.filmpass.dto;
+package com.example.filmpass.dto
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
-
-@Data
-@NoArgsConstructor
-public class MovieResponseDTO {
-    private BoxOfficeResult boxOfficeResult;
-
-
-    @Data
-    public static class BoxOfficeResult {
-        private String boxOfficeType;
-        private String showRange;
-        private List<DailyBoxOfficeDto> dailyBoxOfficeList;
-    }
-
+data class MovieResponseDTO(
+    val boxOfficeResult: BoxOfficeResult? = null
+) {
+    data class BoxOfficeResult(
+        val boxOfficeType: String? = null,
+        val showRange: String? = null,
+        val dailyBoxOfficeList: List<DailyBoxOfficeDto>? = null
+    )
 }

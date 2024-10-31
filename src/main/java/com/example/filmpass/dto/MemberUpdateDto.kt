@@ -1,10 +1,10 @@
-package com.example.filmpass.dto;
+package com.example.filmpass.dto
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Getter
+import lombok.Setter
 
 @Getter
 @Setter
-public class MemberUpdateDto {
-    private String image; // 변경할 프로필 사진
+class MemberUpdateDto {
+    public val image: String? = null // 변경할 프로필 사진
 }

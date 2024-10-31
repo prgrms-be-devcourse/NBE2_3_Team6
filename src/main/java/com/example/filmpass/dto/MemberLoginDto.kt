@@ -1,11 +1,6 @@
-package com.example.filmpass.dto;
+package com.example.filmpass.dto
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class MemberLoginDto {
-    private String id; // 사용자 ID
-    private String password; // 비밀번호
-}
+data class MemberLoginDto(
+    var id: String,       // 사용자 ID
+    var password: String  // 비밀번호
+)

@@ -1,21 +1,23 @@
-package com.example.filmpass.config;
+package com.example.filmpass.config
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-public class WebClientConfig {
+class WebClientConfig {
+
     @Bean
-    public WebClient webClient() {
+    fun webClient(): WebClient {
         return WebClient.builder()
-                .baseUrl("http://www.kobis.or.kr/kobisopenapi/webservice/rest")
-                .build();
+            .baseUrl("http://www.kobis.or.kr/kobisopenapi/webservice/rest")
+            .build()
     }
+
     @Bean
-    public WebClient webClientKMDB() {
+    fun webClientKMDB(): WebClient {
         return WebClient.builder()
-                .baseUrl("http://api.koreafilm.or.kr")
-                .build();
+            .baseUrl("http://api.koreafilm.or.kr")
+            .build()
     }
 }
