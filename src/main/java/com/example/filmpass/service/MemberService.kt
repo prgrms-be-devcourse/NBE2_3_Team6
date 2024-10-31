@@ -4,6 +4,7 @@ import com.example.filmpass.dto.MemberSignupDto
 import com.example.filmpass.entity.Member
 import com.example.filmpass.jwt.JwtUtil
 import com.example.filmpass.repository.MemberRepository
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -21,8 +22,8 @@ class MemberService(
 
     // 사용자 정보 가져오기
     @Throws(UsernameNotFoundException::class)
-    override fun loadUserByUsername(username: String): UserDetails {
-        val member = memberRepository.findByEmail(username).orElseThrow {
+    override fun loadUserByUsername(id: String): UserDetails {
+        val member = memberRepository.findById(id).orElseThrow {
             UsernameNotFoundException("User not found")
         }
         return User(member.id ?: "", member.password ?: "", ArrayList<GrantedAuthority>())
@@ -31,8 +32,8 @@ class MemberService(
     // 회원가입
     fun signup(memberSignupDto: MemberSignupDto) {
         // 중복 체크
-        if (memberRepository.findByEmail(memberSignupDto.email ?: throw RuntimeException("Email is required")).isPresent) {
-            throw RuntimeException("Email already exists")
+        if (memberRepository.findById(memberSignupDto.id ?: throw RuntimeException("Id is required")).isPresent) {
+            throw RuntimeException("ID already exists")
         }
         if (memberRepository.findByNumber(memberSignupDto.number ?: throw RuntimeException("Phone number is required")).isPresent) {
             throw RuntimeException("Phone number already exists")
@@ -56,15 +57,15 @@ class MemberService(
     }
 
     // 로그인
-    fun login(email: String, password: String?): Map<String, String> {
-        val userDetails = loadUserByUsername(email)
+    fun login(id: String, password: String?): Map<String, String> {
+        val userDetails = loadUserByUsername(id)
 
         if (passwordEncoder.matches(password, userDetails.password)) {
-            val token = jwtUtil.generateToken(email)
-            val refreshToken = jwtUtil.generateRefreshToken(email)
+            val token = jwtUtil.generateToken(id)
+            val refreshToken = jwtUtil.generateRefreshToken(id)
 
             // 리프레시 토큰을 DB에 저장
-            val member = memberRepository.findByEmail(email).orElseThrow {
+            val member = memberRepository.findById(id).orElseThrow {
                 UsernameNotFoundException("User not found")
             }
             member.refreshToken = refreshToken // 리프레시 토큰 설정
@@ -77,8 +78,8 @@ class MemberService(
     }
 
     // 이미지 업데이트
-    fun updateProfileImage(email: String, newImage: String) {
-        val member = memberRepository.findByEmail(email).orElseThrow {
+    fun updateProfileImage(id: String, newImage: String) {
+        val member = memberRepository.findById(id).orElseThrow {
             RuntimeException("User not found")
         }
         member.image = newImage
