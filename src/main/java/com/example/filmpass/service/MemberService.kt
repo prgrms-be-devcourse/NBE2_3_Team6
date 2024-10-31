@@ -20,10 +20,8 @@ class MemberService(
     private val jwtUtil: JwtUtil
 ) : UserDetailsService {
 
-    // 사용자 정보 가져오기
-    @Throws(UsernameNotFoundException::class)
-    override fun loadUserByUsername(id: String): UserDetails {
-        val member = memberRepository.findById(id).orElseThrow {
+    override fun loadUserByUsername(username: String): UserDetails {
+        val member = memberRepository.findById(username).orElseThrow {
             UsernameNotFoundException("User not found")
         }
         return User(member.id ?: "", member.password ?: "", ArrayList<GrantedAuthority>())
@@ -52,7 +50,7 @@ class MemberService(
     }
 
     // 멤버 찾기
-    fun findMember(memberId: Long): Member {
+    fun findById(memberId: String): Member {
         return memberRepository.findById(memberId).orElseThrow { RuntimeException("Member not found") }
     }
 
