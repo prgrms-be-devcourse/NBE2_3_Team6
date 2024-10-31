@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MemberLoginDto {
-    private String id; // 사용자 ID
-    private String password; // 비밀번호
+     String id; // 사용자 ID
+     String password; // 비밀번호
 }
 */

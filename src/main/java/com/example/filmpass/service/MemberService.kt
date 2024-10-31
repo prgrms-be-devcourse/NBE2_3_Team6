@@ -1,5 +1,7 @@
 package com.example.filmpass.service
 
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
+
 import com.example.filmpass.dto.MemberSignupDto
 import com.example.filmpass.entity.Member
 import com.example.filmpass.jwt.JwtUtil

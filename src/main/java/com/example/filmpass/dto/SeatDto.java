@@ -30,7 +30,4 @@ public class SeatDto {
         seat.setCinemaMovie(cinemaMovie);
         return seat;
     }
-
-
-
 }

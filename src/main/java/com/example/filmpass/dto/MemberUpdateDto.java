@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MemberUpdateDto {
-    private String image; // 변경할 프로필 사진
+    String image; // 변경할 프로필 사진
 }
