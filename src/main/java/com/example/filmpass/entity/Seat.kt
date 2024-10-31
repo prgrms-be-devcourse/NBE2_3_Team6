@@ -18,6 +18,6 @@ data class Seat(
         @JoinColumn(name = "cinema_movie_id")
         val cinemaMovie: CinemaMovie? = null,
 
-        val isReserved : Boolean=false
+        var isReserved : Boolean=false
 )
 

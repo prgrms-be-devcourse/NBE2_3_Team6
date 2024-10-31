@@ -1,142 +1,103 @@
-package com.example.filmpass.service;
+package com.example.filmpass.service
 
-import com.example.filmpass.dto.CinemaMovieDto;
-import com.example.filmpass.dto.SeatDto;
-import com.example.filmpass.dto.SeatRequest;
-import com.example.filmpass.entity.Cinema;
-import com.example.filmpass.entity.CinemaMovie;
-import com.example.filmpass.entity.Seat;
-import com.example.filmpass.repository.CinemaMovieRepository;
-import com.example.filmpass.repository.CinemaRepository;
-import com.example.filmpass.repository.SeatRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.example.filmpass.dto.SeatDto
+import com.example.filmpass.dto.SeatRequest
+import com.example.filmpass.entity.Seat
+import com.example.filmpass.repository.CinemaMovieRepository
+import com.example.filmpass.repository.CinemaRepository
+import com.example.filmpass.repository.SeatRepository
+import jakarta.persistence.EntityNotFoundException
+import org.hibernate.query.sqm.tree.SqmNode.log
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-@RequiredArgsConstructor
-@Log4j2
-public class SeatService {
-    private final SeatRepository seatRepository;
-    private final CinemaRepository cinemaRepository;
-    private final CinemaMovieRepository cinemaMovieRepository;
+class SeatService (
+    private val seatRepository: SeatRepository,
+    private val cinemaRepository: CinemaRepository,
+    private val cinemaMovieRepository: CinemaMovieRepository
+    ) {
 
-
-    //좌석 생성
-//    public List<SeatDto> create(SeatRequest seatRequest) {
-//        List<SeatDto> seatDtoList = new ArrayList<>();
-//
-//        //중복 생성 방지
-//        if (seatRepository.existsByCinemaCinemaId(seatRequest.getCinemaId()).orElse(false)) {
-//            log.info("해당 상영관의 좌석이 이미 생성되었습니다");
-//            return seatDtoList;
-//        }
-//
-//        Cinema cinema = cinemaRepository.findById(seatRequest.getCinemaId()).orElseThrow(()-> new EntityNotFoundException("Cinema Not Found"));
-//
-//        int rows = cinema.getSeatRow();
-//        int cols = cinema.getSeatCol();
-//
-//        for (int row = 1; row <= rows; row++) {
-//            for (int col = 1; col <= cols; col++) {
-//                SeatDto seatDto = new SeatDto();
-//                seatDto.setSeatX(row);
-//                seatDto.setSeatY(col);
-//                seatDto.setReserved(false);
-//                seatDto.setCinemaName(cinema.getCinemaName());
-//
-//                Seat seat = seatDto.toEntity(cinema);
-//                seatRepository.save(seat);
-//                log.info("Creating seat: row={}, col={}", row, col);
-//
-//                seatDto.setSeatId(seat.getSeatId());
-//                seatDtoList.add(seatDto);
-//            }
-//        }
-//        return seatDtoList;
-//    }
-
-    public List<SeatDto> create(SeatRequest seatRequest) {
-        List<SeatDto> seatDtoList = new ArrayList<>();
+    fun create(seatRequest: SeatRequest): List<SeatDto> {
+        val seatDtoList: MutableList<SeatDto> = mutableListOf()
 
         //중복 생성 방지
-        if (seatRepository.existsByCinemaMovie_CinemaMovieIdAndCinema_cinemaId(seatRequest.getCinemaMovieId(), seatRequest.getCinemaId()).orElse(false)) {
-            log.info("해당 상영정보의 좌석이 이미 생성되었습니다");
-            return seatDtoList;
+        if (seatRepository.existsByCinemaMovieCinemaMovieIdAndCinemaCinemaId(
+                seatRequest.cinemaMovieId,
+                seatRequest.cinemaId
+            ) == true
+        ) {
+            return seatDtoList
         }
 
-        CinemaMovie cinemaMovie = cinemaMovieRepository.findById(seatRequest.getCinemaMovieId())
-                .orElseThrow(() -> new EntityNotFoundException("CinemaMovie Not Found"));
+        val cinemaMovie = cinemaMovieRepository.findByIdOrNull(seatRequest.cinemaMovieId)
+            ?: throw EntityNotFoundException("CinemaMovie Not Found")
 
-        Cinema cinema = cinemaMovie.getCinema();
+        val cinema = cinemaMovie.cinema
 
-        int rows = cinema.getSeatRow();
-        int cols = cinema.getSeatCol();
+        val rows: Int? = cinema?.seatRow
+        val cols: Int? = cinema?.seatCol
 
-        for (int row = 1; row <= rows; row++) {
-            for (int col = 1; col <= cols; col++) {
-                SeatDto seatDto = new SeatDto();
-                seatDto.setSeatX(row);
-                seatDto.setSeatY(col);
-                seatDto.setReserved(false);
-                seatDto.setCinemaName(cinema.getCinemaName());
-                seatDto.setCinemaMovieId(cinemaMovie.getCinemaMovieId());
+        for (row in 1..rows!!) {
+            for (col in 1..cols!!) {
+                val seatDto: SeatDto = SeatDto(
+                    seatX = row,
+                    seatY = col,
+                    isReserved = false,
+                    cinemaName = cinema.cinemaName,
+                    cinemaMovieId = cinemaMovie.cinemaMovieId
+                )
 
-                Seat seat = seatDto.toEntity(cinema, cinemaMovie);
-                seatRepository.save(seat);
-                log.info("Creating seat: row={}, col={}", row, col);
+                val seat: Seat = seatDto.toEntity(cinema, cinemaMovie)
+                seatRepository.save<Seat>(seat)
 
-                seatDto.setSeatId(seat.getSeatId());
-                seatDtoList.add(seatDto);
+                seatDto.seatId = seat.seatId
+                seatDtoList.add(seatDto)
             }
         }
-        return seatDtoList;
+        return seatDtoList
     }
 
-    //좌석 조회
-    public List<SeatDto> read(Long cinemaMovieId) {
-        List<Seat> seats = seatRepository.findByCinemaMovieCinemaMovieId(cinemaMovieId);
-        List<SeatDto> seatDtoList = new ArrayList<>();
-
-        for(Seat seat : seats) {
-            SeatDto seatDto = new SeatDto();
-            seatDto.setSeatId(seat.getSeatId());
-            seatDto.setSeatX(seat.getSeatRow());
-            seatDto.setSeatY(seat.getSeatCol());
-            seatDto.setCinemaName(seat.getCinema().getCinemaName());
-            seatDto.setReserved(seat.isReserved());
-            seatDto.setCinemaMovieId(seat.getCinemaMovie().getCinemaMovieId());
-
-            seatDtoList.add(seatDto);
-        }
-        return seatDtoList;
-    }
-
-//    좌석 선택
-    public SeatDto reserveSeat(SeatRequest seatRequest) {
-        Seat seat = seatRepository.findBySeatRowAndSeatColAndCinemaMovieCinemaMovieId(seatRequest.getRows(), seatRequest.getCols(),seatRequest.getCinemaMovieId());
-        if(!seat.isReserved()) {
-            seat.setReserved(false);
-//            seatRepository.save(seat);
-        }else {
-            log.warn("Reserved Seat");
-            throw new IllegalStateException("이미 예매된 좌석");
-
-        }
-        return SeatDto.builder()
-                .seatId(seat.getSeatId())
-                .seatX(seat.getSeatRow())
-                .seatY(seat.getSeatCol())
-                .isReserved(seat.isReserved())
-                .build();
-    }
-
-
+//    //좌석 조회
+//    fun read(cinemaMovieId: Long?): List<SeatDto> {
+//        val seats: List<Seat> = seatRepository.findByCinemaMovieCinemaMovieId(cinemaMovieId)
+//        val seatDtoList: MutableList<SeatDto> = ArrayList<SeatDto>()
+//
+//        for (seat in seats) {
+//            val seatDto: SeatDto = SeatDto()
+//            seatDto.setSeatId(seat.seatId)
+//            seatDto.setSeatX(seat.seatRow)
+//            seatDto.setSeatY(seat.seatCol)
+//            seatDto.setCinemaName(seat.cinema.cinemaName)
+//            seatDto.setReserved(seat.isReserved)
+//            seatDto.setCinemaMovieId(seat.cinemaMovie.getCinemaMovieId())
+//
+//            seatDtoList.add(seatDto)
+//        }
+//        return seatDtoList
+//    }
+//
+//    //    좌석 선택
+//    fun reserveSeat(seatRequest: SeatRequest): SeatDto {
+//        val seat: Seat = seatRepository.findBySeatRowAndSeatColAndCinemaMovieCinemaMovieId(
+//            seatRequest.rows,
+//            seatRequest.cols,
+//            seatRequest.cinemaMovieId
+//        )
+//        if (!seat.isReserved) {
+//            seat.setReserved(false)
+//            //            seatRepository.save(seat);
+//        } else {
+//            log.warn("Reserved Seat")
+//            throw IllegalStateException("이미 예매된 좌석")
+//        }
+//        return SeatDto.builder()
+//            .seatId(seat.seatId)
+//            .seatX(seat.seatRow)
+//            .seatY(seat.seatCol)
+//            .isReserved(seat.isReserved)
+//            .build()
+//    }
 }
