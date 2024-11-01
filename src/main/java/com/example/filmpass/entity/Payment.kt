@@ -11,10 +11,6 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "payment")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @EntityListeners(
     AuditingEntityListener::class
 )
