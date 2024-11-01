@@ -9,28 +9,26 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/reservation")
-@Log4j2
-class ReservationController {
-    private val reservationService: ReservationService? = null
+class ReservationController (
+    private val reservationService: ReservationService){
 
 
     //예매 등록
     @PostMapping
-    fun createReservation(@RequestBody reservationDto: ReservationDto?): ResponseEntity<ReservationDto> {
-        return ResponseEntity.ok(reservationService!!.create(reservationDto!!))
+    fun createReservation(@RequestBody reservationDto: ReservationDto): ResponseEntity<ReservationDto> {
+        return ResponseEntity.ok(reservationService.create(reservationDto))
     }
 
     //예매 조회
     @GetMapping("/{id}")
     fun read(@PathVariable id: Long?): ResponseEntity<ReservationReadDto> {
-        return ResponseEntity.ok(reservationService!!.read(id!!))
+        return ResponseEntity.ok(reservationService.read(id!!))
     }
 
     @DeleteMapping("/{id}")
     fun deleteReservation(@PathVariable id: Long?): ResponseEntity<Void> {
-        reservationService!!.remove(id!!)
+        reservationService.remove(id!!)
         return ResponseEntity.noContent().build()
     }
 }

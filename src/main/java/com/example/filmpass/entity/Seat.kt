@@ -1,27 +1,23 @@
-package com.example.filmpass.entity
+package com.example.filmpass.entity;
 
 import jakarta.persistence.*
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
 @Table(name = "seat")
-@EntityListeners(AuditingEntityListener::class)
-class Seat {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var seatId: Long? = null
+data class Seat(
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+        val seatId: Long? = null,
+        var seatRow:Int,
+        var seatCol:Int,
 
-    var seatRow: Int = 0
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "cinema_id")
+        var cinema: Cinema? = null,
 
-    var seatCol: Int = 0
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "cinema_movie_id")
+        var cinemaMovie: CinemaMovie? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cinema_id")
-    var cinema: Cinema? = null // private -> public으로 변경
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cinema_movie_id")
-    var cinemaMovie: CinemaMovie? = null // private -> public으로 변경
-
-    var isReserved: Boolean = false // private -> public으로 변경 및 기본값 설정
-}
+        var isReserved : Boolean=false
+)

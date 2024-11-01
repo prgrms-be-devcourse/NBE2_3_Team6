@@ -1,21 +1,13 @@
-package com.example.filmpass.repository;
+package com.example.filmpass.repository
 
-import com.example.filmpass.entity.Seat;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.filmpass.entity.Seat
+import org.springframework.data.jpa.repository.JpaRepository
+import java.util.*
 
-import java.util.List;
-import java.util.Optional;
+interface SeatRepository : JpaRepository<Seat?, Long?> {
+fun findByCinemaMovieCinemaMovieId(cinemaMovieId: Long?): List<Seat?>?
 
-public interface SeatRepository extends JpaRepository<Seat, Long> {
-//    Seat findBySeatRowAndSeatColAndCinemaCinemaId(int seatRow, int seatCol, Long cinemaId);
+fun findBySeatRowAndSeatColAndCinemaMovieCinemaMovieId(rows: Int, cols: Int, cinemaMovieId: Long?): Seat?
 
-//    Optional<Boolean> existsByCinemaCinemaId(Long cinemaId);
-
-    List<Seat> findByCinemaMovieCinemaMovieId(Long cinemaMovieId);
-
-//    Optional<Boolean> existsByCinemaMovie_CinemaMovieId(Long cinemaMovieId);
-
-    Seat findBySeatRowAndSeatColAndCinemaMovieCinemaMovieId(int rows, int cols, Long cinemaMovieId);
-
-    Optional<Boolean> existsByCinemaMovie_CinemaMovieIdAndCinema_cinemaId(Long cinemaMovieId, Long cinemaId);
-}
+fun existsByCinemaMovie_CinemaMovieIdAndCinema_cinemaId(cinemaMovieId: Long?, cinemaId: Long?): Boolean
+        }
