@@ -6,17 +6,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
 @Table(name = "cinema")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(
     AuditingEntityListener::class
 )
-data class Cinema (
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val cinemaId: Long? = null,
-
-    val cinemaName: String? = null,
-
-    val seatRow: Int = 0,
-
-    val seatCol: Int = 0
-)
+    class Cinema( @Id
+                  @GeneratedValue(strategy = GenerationType.IDENTITY)
+                  val cinemaId: Long? = null,
+                  var cinemaName: String?,
+                  var seatRow: Int,
+                  var seatCol: Int
+    )
