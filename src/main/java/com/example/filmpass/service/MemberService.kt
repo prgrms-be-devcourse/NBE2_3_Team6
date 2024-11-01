@@ -11,6 +11,11 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.UUID
 
 @Service
 class MemberService(
@@ -19,10 +24,8 @@ class MemberService(
     private val jwtUtil: JwtUtil
 ) : UserDetailsService {
 
-    // 사용자 정보 가져오기
-    @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val member = memberRepository.findByEmail(username).orElseThrow {
+        val member = memberRepository.findById(username).orElseThrow {
             UsernameNotFoundException("User not found")
         }
         return User(member.id ?: "", member.password ?: "", ArrayList<GrantedAuthority>())
@@ -31,8 +34,8 @@ class MemberService(
     // 회원가입
     fun signup(memberSignupDto: MemberSignupDto) {
         // 중복 체크
-        if (memberRepository.findByEmail(memberSignupDto.email ?: throw RuntimeException("Email is required")).isPresent) {
-            throw RuntimeException("Email already exists")
+        if (memberRepository.findById(memberSignupDto.id ?: throw RuntimeException("Id is required")).isPresent) {
+            throw RuntimeException("ID already exists")
         }
         if (memberRepository.findByNumber(memberSignupDto.number ?: throw RuntimeException("Phone number is required")).isPresent) {
             throw RuntimeException("Phone number already exists")
@@ -51,20 +54,20 @@ class MemberService(
     }
 
     // 멤버 찾기
-    fun findMember(memberId: Long): Member {
+    fun findById(memberId: String): Member {
         return memberRepository.findById(memberId).orElseThrow { RuntimeException("Member not found") }
     }
 
     // 로그인
-    fun login(email: String, password: String?): Map<String, String> {
-        val userDetails = loadUserByUsername(email)
+    fun login(id: String, password: String?): Map<String, String> {
+        val userDetails = loadUserByUsername(id)
 
         if (passwordEncoder.matches(password, userDetails.password)) {
-            val token = jwtUtil.generateToken(email)
-            val refreshToken = jwtUtil.generateRefreshToken(email)
+            val token = jwtUtil.generateToken(id)
+            val refreshToken = jwtUtil.generateRefreshToken(id)
 
             // 리프레시 토큰을 DB에 저장
-            val member = memberRepository.findByEmail(email).orElseThrow {
+            val member = memberRepository.findById(id).orElseThrow {
                 UsernameNotFoundException("User not found")
             }
             member.refreshToken = refreshToken // 리프레시 토큰 설정
@@ -76,12 +79,24 @@ class MemberService(
         }
     }
 
-    // 이미지 업데이트
-    fun updateProfileImage(email: String, newImage: String) {
-        val member = memberRepository.findByEmail(email).orElseThrow {
-            RuntimeException("User not found")
-        }
-        member.image = newImage
+    // 이미지 파일 저장
+    fun saveProfileImage(imageFile: MultipartFile): String {
+        // 파일 이름 생성 (UUID 사용)
+        val fileName = UUID.randomUUID().toString() + "_" + imageFile.originalFilename
+        val uploadDir = "C:\\Users\\sumin\\Desktop\\changeimage" //이미지 저장할 서버 경로(개인 폴더 경로로 설정하시면 됩니다.)
+        val filePath: Path = Paths.get(uploadDir, fileName)
+
+        // 파일 저장
+        Files.copy(imageFile.inputStream, filePath)
+
+        // 파일 URL 반환 (필요에 따라 조정)
+        return "/images/$fileName" // 웹에서 접근할 수 있는 URL 형태로 조정
+    }
+
+    // 프로필 이미지 업데이트
+    fun updateProfileImage(id: String, imageUrl: String) {
+        val member = findById(id)
+        member.image = imageUrl
         memberRepository.save(member)
     }
 }
