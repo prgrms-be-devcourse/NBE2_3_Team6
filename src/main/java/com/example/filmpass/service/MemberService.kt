@@ -83,7 +83,7 @@ class MemberService(
     fun saveProfileImage(imageFile: MultipartFile): String {
         // 파일 이름 생성 (UUID 사용)
         val fileName = UUID.randomUUID().toString() + "_" + imageFile.originalFilename
-        val uploadDir = "C:\\Users\\sumin\\Desktop\\changeimage" // 이미지 파일을 저장할 경로
+        val uploadDir = "C:\\Users\\sumin\\Desktop\\changeimage" //이미지 저장할 서버 경로(개인 폴더 경로로 설정하시면 됩니다.)
         val filePath: Path = Paths.get(uploadDir, fileName)
 
         // 파일 저장
