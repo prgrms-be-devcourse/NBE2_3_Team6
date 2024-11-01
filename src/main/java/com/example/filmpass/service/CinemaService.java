@@ -37,7 +37,7 @@ public class CinemaService {
         List<CinemaDto> cinemaDtoList = new ArrayList<>();
 
         for(Cinema cinema : cinemas) {
-            CinemaDto cinemaDto = new CinemaDto();
+            CinemaDto cinemaDto = new CinemaDto(cinema);
             cinemaDto.setId(cinema.getCinemaId());
             cinemaDto.setCinemaName(cinema.getCinemaName());
             cinemaDto.setSeatRow(cinema.getSeatRow());
