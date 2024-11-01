@@ -57,6 +57,8 @@ dependencies {
 
 	// JSON 관련 라이브러리
 	implementation("org.json:json:20210307")
+
+	// json-simple 의존성
 	implementation("com.googlecode.json-simple:json-simple:1.1.1")
 }
 
