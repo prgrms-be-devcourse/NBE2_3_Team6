@@ -1,43 +1,41 @@
-package com.example.filmpass.entity;
+package com.example.filmpass.entity
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.NoArgsConstructor
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Entity
 @Table(name = "cinema_movie")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@EntityListeners(AuditingEntityListener.class)
-public class CinemaMovie {
+@EntityListeners(
+    AuditingEntityListener::class
+)
+class CinemaMovie(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cinema_movie_id")
-    private Long cinemaMovieId;
+    val cinemaMovieId: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
-    public Movie movie;
+    var movie: Movie? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_id")
-    private Cinema cinema;
+    var cinema: Cinema? = null,
 
     @OneToMany(mappedBy = "cinemaMovie")
-    private List<Seat> seat  = new ArrayList<>();
+    val seat: List<Seat> = ArrayList(),
 
-    private LocalDate screenDate;
+    var screenDate: LocalDate? = null,
 
-    private LocalTime screenTime;
+    var screenTime: LocalTime? = null,
 
-    private LocalTime showTime;
-
-}
+    var showTime: LocalTime? = null // showTime 필드 추가
+)

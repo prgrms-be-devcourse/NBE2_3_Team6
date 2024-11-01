@@ -1,115 +1,104 @@
-package com.example.filmpass.service;
+package com.example.filmpass.service
 
-import com.example.filmpass.dto.CinemaMovieDto;
-import com.example.filmpass.dto.MovieListDto;
-import com.example.filmpass.entity.Cinema;
-import com.example.filmpass.entity.CinemaMovie;
-import com.example.filmpass.entity.Movie;
-import com.example.filmpass.repository.CinemaMovieRepository;
-import com.example.filmpass.repository.CinemaRepository;
-import com.example.filmpass.repository.MovieRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.cglib.core.Local;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import com.example.filmpass.dto.CinemaMovieDto
+import com.example.filmpass.dto.MovieListDto
+import com.example.filmpass.entity.CinemaMovie
+import com.example.filmpass.repository.CinemaMovieRepository
+import com.example.filmpass.repository.CinemaRepository
+import com.example.filmpass.repository.MovieRepository
+import lombok.RequiredArgsConstructor
+import lombok.extern.log4j.Log4j2
+import org.hibernate.query.sqm.tree.SqmNode.log
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.*
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Log4j2
-public class CinemaMovieService {
-    private final CinemaMovieRepository cinemaMovieRepository;
-    private final CinemaRepository cinemaRepository;
-    private final MovieRepository movieRepository;
+class CinemaMovieService {
+    private val cinemaMovieRepository: CinemaMovieRepository? = null
+    private val cinemaRepository: CinemaRepository? = null
+    private val movieRepository: MovieRepository? = null
 
-    public List<CinemaMovieDto> registerCinema() {
-        List<Movie> movies = movieRepository.findAll();
-        List<CinemaMovieDto> moviesDto = new ArrayList<>();
+    fun registerCinema(): List<CinemaMovieDto> {
+        val movies = movieRepository!!.findAll()
+        var moviesDto: MutableList<CinemaMovieDto> = ArrayList()
+        val random = Random()
 
-        Random random = new Random();
+        for (movie in movies) {
+            // movie.showTm이 null인지 체크
+            val allminutes = movie.showTm?.toInt() ?: continue // showTm이 null일 경우, 다음 movie로 넘어감
+            val hour = allminutes / 60
+            val min = allminutes % 60
+            val showtime = LocalTime.of(hour, min)
 
-        for (Movie movie : movies) {
-            int allminutes = Integer.parseInt(movie.getShowTm());
-            int hour = allminutes / 60;
-            int min = allminutes % 60;
-            LocalTime showtime = LocalTime.of(hour, min);
-            if(cinemaMovieRepository.findByMovie_MovieId(movie.getMovieId()).isEmpty()){
-                for (int i = 0; i < 7; i++) {
-                    long cinemaId = random.nextInt(5)+1;
+            // cinemaMovieRepository에서 null 체크
+            if (cinemaMovieRepository?.findByMovie_MovieId(movie.movieId)?.isEmpty() == true) {
+                for (i in 0..6) {
+                    val cinemaId = (random.nextInt(5) + 1).toLong()
 
-                    Cinema cinema = cinemaRepository.findById(cinemaId).get();
-                    CinemaMovie cinemaMovie = CinemaMovie.builder()
-                            .movie(movie) // movie 객체 설정
-                            .screenDate(LocalDate.from(LocalDateTime.now().plusDays(i))) // 오늘부터 i일 더한 날짜로 설정
-                            .screenTime(showtime) // showtime은 상영 시간으로 설정
-                            .showTime(generateRandomTime())
-                            .cinema(cinema)
-                            .build();
+                    // cinemaId에 해당하는 cinema 객체가 있는지 체크
+                    val cinemaOptional = cinemaRepository?.findById(cinemaId)
+                    if (cinemaOptional?.isPresent == true) {
+                        val cinema = cinemaOptional.get()
 
-                    cinemaMovieRepository.save(cinemaMovie); // cinemaMovie 저장
-                    CinemaMovieDto cinemaMovieDto = new CinemaMovieDto(
-                            cinemaMovie.getCinemaMovieId(),
-                            cinemaMovie.getMovie(),
-                            cinemaMovie.getScreenDate(),
-                            cinemaMovie.getScreenTime(),
-                            cinemaMovie.getShowTime(),
-                            cinemaMovie.getMovie().getMovieName(),
-                            cinemaMovie.getCinema());
+                        val cinemaMovie: CinemaMovie = CinemaMovie(
+                            movie = movie, // movie 객체 설정
+                            screenDate = LocalDate.now().plusDays(i.toLong()), // 오늘부터 i일 더한 날짜로 설정
+                            screenTime = showtime, // showtime은 상영 시간으로 설정
+                            showTime = generateRandomTime(), // 무작위 시간 생성
+                            cinema = cinema // cinema 객체 설정
+                        )
 
-                    moviesDto.add(cinemaMovieDto);
+                        // cinemaMovie 저장
+                        cinemaMovieRepository?.save(cinemaMovie)
+
+                        val cinemaMovieDto = CinemaMovieDto(
+                            cinemaMovie.cinemaMovieId,
+                            cinemaMovie.movie,
+                            cinemaMovie.screenDate,
+                            cinemaMovie.screenTime,
+                            cinemaMovie.showTime,
+                            cinemaMovie.movie?.movieName ?: "Unknown", // movieName null 체크
+                            cinemaMovie.cinema
+                        )
+
+                        moviesDto.add(cinemaMovieDto)
+                    } else {
+                        log.warn("Cinema with ID $cinemaId not found.")
+                    }
                 }
             }
         }
-        return moviesDto;
+        return moviesDto
+    }
+    private fun generateRandomTime(): LocalTime {
+        val random = Random()
+        val hour = random.nextInt(17) + 7
+        val min = random.nextInt(60)
+        return LocalTime.of(hour, min)
     }
 
-    private LocalTime generateRandomTime() {
-        Random random = new Random();
-        int hour = random.nextInt(17)+7;
-        int min = random.nextInt(60);
-        return LocalTime.of(hour, min);
-    }
+    fun read(movieId: Long?): MovieListDto? {
+        val cinemaMovieList = cinemaMovieRepository!!.findByMovie_MovieId(movieId)
 
-
-//    public CinemaMovieDto registerCinema(CinemaMovieDto cinemaMovieDto) {
-//        Movie movie = movieRepository.findById(cinemaMovieDto.getMovieId()).get();
-//        Cinema cinema = cinemaRepository.findById(cinemaMovieDto.getCinemaId()).get();
-//
-//        Optional<CinemaMovie> error = cinemaMovieRepository
-//                .findByMovieMovieIdAndCinemaCinemaIdAndScreenDateAndScreenTime(movie.getMovieId(), cinema.getCinemaId(), cinemaMovieDto.getScreenDate(), cinemaMovieDto.getScreenTime());
-//
-//        if (error.isPresent()) {
-//            throw new IllegalArgumentException("이미 등록된 영화의 상영정보 입니다");
-//        }
-//
-//        CinemaMovie cinemaMovie = cinemaMovieDto.toEntity(movie, cinema);
-//        CinemaMovie savedCinemaMovie = cinemaMovieRepository.save(cinemaMovie);
-//        return new CinemaMovieDto(movie.getMovieId(), savedCinemaMovie);
-//    }
-
-    //        상영중인 영화 상영정보 조회
-    public MovieListDto read(Long movieId) {
-        List<CinemaMovie> cinemaMovieList = cinemaMovieRepository.findByMovie_MovieId(movieId);
-
-        List<CinemaMovieDto> infoDto = new ArrayList<>();
-        for (CinemaMovie cinemaMovie : cinemaMovieList) {
-            infoDto.add(new CinemaMovieDto(movieId, cinemaMovie));
+        val infoDto: MutableList<CinemaMovieDto> = ArrayList()
+        if (cinemaMovieList != null) {
+            for (cinemaMovie in cinemaMovieList) {
+                cinemaMovie?.let { CinemaMovieDto(movieId, it) }?.let { infoDto.add(it) }
+            }
         }
 
-        if (cinemaMovieList.isEmpty()) {
-            throw new IllegalStateException("상영정보가 없습니다");
+        if (cinemaMovieList != null) {
+            check(cinemaMovieList.isNotEmpty()) { "상영정보가 없습니다" }
         }
-        CinemaMovie movieName = cinemaMovieList.get(0);
+        val movieName = cinemaMovieList?.get(0)
 
-        return new MovieListDto(movieId, movieName, infoDto);
+        return movieName?.let { MovieListDto(movieId!!, it, infoDto) }
     }
 }
