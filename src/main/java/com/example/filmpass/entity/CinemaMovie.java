@@ -40,5 +40,4 @@ public class CinemaMovie {
 
     private LocalTime showTime;
 
-
 }
