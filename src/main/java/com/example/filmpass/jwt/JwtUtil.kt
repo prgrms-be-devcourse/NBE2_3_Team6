@@ -13,52 +13,52 @@ import java.util.function.Function
 @Component
 class JwtUtil {
     @Value("\${jwt.secret}")
-    private lateinit var SECRET_KEY: String
+    private lateinit var secretKey: String // 변수를 소문자로 시작하는 컨벤션에 맞게 변경
 
-    // JWT에서 사용자 이름 추출
-    fun extractUsername(token: String?): String {
-        return extractClaim(token) { obj: Claims -> obj.subject }
+    // JWT에서 사용자 ID 추출
+    fun extractId(token: String?): String? {
+        return extractClaim(token) { claims: Claims -> claims.subject }
     }
 
     // JWT 클레임에서 만료 날짜 추출
-    fun extractExpiration(token: String?): Date {
-        return extractClaim(token) { obj: Claims -> obj.expiration }
+    fun extractExpiration(token: String?): Date? {
+        return extractClaim(token) { claims: Claims -> claims.expiration }
     }
 
     // 특정 클레임 추출
-    fun <T> extractClaim(token: String?, claimsResolver: Function<Claims, T>): T {
+    private fun <T> extractClaim(token: String?, claimsResolver: Function<Claims, T>): T {
         val claims = extractAllClaims(token)
         return claimsResolver.apply(claims)
     }
 
     // 모든 클레임 추출
     private fun extractAllClaims(token: String?): Claims {
-        try {
-            return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).body
+        return try {
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body
         } catch (e: Exception) {
-            throw IllegalArgumentException("Invalid JWT token")
+            throw IllegalArgumentException("Invalid JWT token: ${e.message}", e) // 오류 메시지 추가
         }
     }
 
     // 토큰 만료 여부 확인
     private fun isTokenExpired(token: String?): Boolean {
-        return extractExpiration(token).before(Date())
+        return extractExpiration(token)?.before(Date()) ?: true // null 처리 추가
     }
 
     // 엑세스 토큰 생성
-    fun generateToken(username: String): String {
+    fun generateToken(id: String): String {
         val nowKST = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
         println("Current Time (KST - JWT Generation): $nowKST")
-        println("JWT 만료 시간 (KST): " + nowKST.plusHours(1))
+        println("JWT 만료 시간 (KST): ${nowKST.plusHours(1)}")
 
-        val claims: Map<String, Any?> = HashMap()
-        return createToken(claims, username, 1, false)
+        val claims = emptyMap<String, Any?>() // 빈 맵으로 초기화
+        return createToken(claims, id, 1, false)
     }
 
     // 리프레시 토큰 생성 (30일 유효)
-    fun generateRefreshToken(username: String): String {
-        val claims: Map<String, Any?> = HashMap()
-        return createToken(claims, username, 30, true)
+    fun generateRefreshToken(id: String): String {
+        val claims = emptyMap<String, Any?>() // 빈 맵으로 초기화
+        return createToken(claims, id, 30, true)
     }
 
     // JWT 생성 메서드
@@ -70,10 +70,10 @@ class JwtUtil {
     ): String {
         val now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
         val issuedAt = Date.from(now.toInstant())
-        var expiration = Date.from(now.plusHours(duration.toLong()).toInstant())
-
-        if (isRefreshToken) {
-            expiration = Date.from(now.plusDays(duration.toLong()).toInstant())
+        val expiration = if (isRefreshToken) {
+            Date.from(now.plusDays(duration.toLong()).toInstant())
+        } else {
+            Date.from(now.plusHours(duration.toLong()).toInstant())
         }
 
         return Jwts.builder()
@@ -81,13 +81,13 @@ class JwtUtil {
             .setSubject(subject)
             .setIssuedAt(issuedAt)
             .setExpiration(expiration)
-            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+            .signWith(SignatureAlgorithm.HS256, secretKey)
             .compact()
     }
 
     // JWT 유효성 검사
-    fun validateToken(token: String?, username: String): Boolean {
-        val extractedUsername = extractUsername(token)
-        return (extractedUsername == username && !isTokenExpired(token))
+    fun validateToken(token: String?, id: String): Boolean {
+        val extractedId = extractId(token)
+        return (extractedId == id && !isTokenExpired(token))
     }
 }
