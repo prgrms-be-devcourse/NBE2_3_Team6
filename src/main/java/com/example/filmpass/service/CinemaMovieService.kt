@@ -90,7 +90,7 @@ class CinemaMovieService {
     //        return new CinemaMovieDto(movie.getMovieId(), savedCinemaMovie);
     //    }
     //        상영중인 영화 상영정보 조회
-    fun read(movieId: Long?): MovieListDto {
+    fun read(movieId: Long): MovieListDto {
         val cinemaMovieList = cinemaMovieRepository!!.findByMovie_MovieId(movieId)
 
         val infoDto: MutableList<CinemaMovieDto> = ArrayList()
