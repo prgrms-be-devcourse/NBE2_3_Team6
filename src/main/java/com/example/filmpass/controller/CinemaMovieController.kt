@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.*
 @RequiredArgsConstructor
 @RequestMapping("/cinemaMovie")
 @Log4j2
-class CinemaMovieController {
-    private val cinemaMovieService: CinemaMovieService? = null
+class CinemaMovieController (private val cinemaMovieService: CinemaMovieService){
+
 
     //상영중인 영화 등록
     @PostMapping //    public ResponseEntity<CinemaMovieDto> create(@RequestBody CinemaMovieDto cinemaMovieDto) {
     //        return ResponseEntity.ok(cinemaMovieService.registerCinema(cinemaMovieDto));
     fun create(): ResponseEntity<List<CinemaMovieDto>> {
-        return ResponseEntity.ok(cinemaMovieService!!.registerCinema())
+        return ResponseEntity.ok(cinemaMovieService.registerCinema())
     }
 
     //상영중인 영화 조회
     @GetMapping("/{movieId}")
     fun read(@PathVariable movieId: Long?): ResponseEntity<MovieListDto> {
-        return ResponseEntity.ok(cinemaMovieService!!.read(movieId))
+        return ResponseEntity.ok(cinemaMovieService.read(movieId))
     }
 }

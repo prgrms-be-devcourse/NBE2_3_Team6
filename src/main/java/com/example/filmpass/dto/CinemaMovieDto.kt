@@ -7,38 +7,44 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import lombok.AllArgsConstructor
 import lombok.Data
 import lombok.NoArgsConstructor
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import java.time.LocalDate
 import java.time.LocalTime
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class CinemaMovieDto (
+    val movieId: Long? = null,
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class CinemaMovieDto {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private val movieId: Long? = null
+    var cinemaId: Long? = null,
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private var cinemaId: Long? = null
+    var cinemaMovieId: Long?,
 
-    private var cinemaMovieId: Long?
+    var title: String?,
 
-    private var title: String?
+    var cinemaName: String? = null,
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private var cinemaName: String? = null
+    var screenDate: LocalDate?,
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private var screenDate: LocalDate?
+    var screenTime: LocalTime?,
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private var screenTime: LocalTime?
+    var showTime: LocalTime?,
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private var showTime: LocalTime?
+    var movie: Movie? = null,
 
-    private var movie: Movie? = null
+    var cinema: Cinema? = null
+){
+    constructor(id: Long?, cinemaMovie: CinemaMovie) : this(
+        movieId = cinemaMovie.movie?.movieId,
+        cinemaId = cinemaMovie.cinema?.cinemaId,
+        cinemaMovieId = cinemaMovie.cinemaMovieId,
+        title = cinemaMovie.movie?.movieName,
+        cinemaName = cinemaMovie.cinema?.cinemaName,
+        screenDate = cinemaMovie.screenDate,
+        screenTime = cinemaMovie.screenTime,
+        showTime = cinemaMovie.showTime,
+        movie = cinemaMovie.movie,
+        cinema = cinemaMovie.cinema
+    )
 
-    private var cinema: Cinema? = null
 
     constructor(
         id: Long?,
@@ -48,26 +54,18 @@ class CinemaMovieDto {
         showTime: LocalTime?,
         title: String?,
         cinema: Cinema?
-    ) {
-        this.cinemaMovieId = id
-        this.movie = movie
-        this.screenDate = screenDate
-        this.screenTime = screenTime
-        this.showTime = showTime
-        this.title = title
-        this.cinema = cinema
-    }
-
-
-    constructor(id: Long?, cinemaMovie: CinemaMovie) {
-        this.cinemaId = cinemaMovie.cinema!!.cinemaId
-        this.title = cinemaMovie.movie!!.movieName
-        this.cinemaMovieId = cinemaMovie.cinemaMovieId
-        this.cinemaName = cinemaMovie.cinema!!.cinemaName
-        this.screenDate = cinemaMovie.screenDate
-        this.screenTime = cinemaMovie.screenTime
-        this.showTime = cinemaMovie.showTime
-    }
+    ) : this(
+        movieId = movie?.movieId,
+        cinemaId = cinema?.cinemaId,
+        cinemaMovieId = id,
+        title = title,
+        cinemaName = cinema?.cinemaName,
+        screenDate = screenDate,
+        screenTime = screenTime,
+        showTime = showTime,
+        movie = movie,
+        cinema = cinema
+    )
 
     fun toEntity(movie: Movie?, cinema: Cinema?): CinemaMovie {
         return CinemaMovie(
@@ -75,7 +73,7 @@ class CinemaMovieDto {
             cinema = cinema,
             screenDate = screenDate,
             screenTime = screenTime,
-            showTime = showTime // 필요 시 showTime도 전달
+            showTime = showTime
         )
     }
 }

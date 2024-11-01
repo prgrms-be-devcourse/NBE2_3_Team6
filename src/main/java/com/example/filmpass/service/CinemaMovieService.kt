@@ -20,10 +20,10 @@ import java.util.*
 @Transactional
 @RequiredArgsConstructor
 @Log4j2
-class CinemaMovieService {
-    private val cinemaMovieRepository: CinemaMovieRepository? = null
-    private val cinemaRepository: CinemaRepository? = null
-    private val movieRepository: MovieRepository? = null
+class CinemaMovieService (private val cinemaMovieRepository: CinemaMovieRepository,
+                          private val cinemaRepository: CinemaRepository,
+                          private val movieRepository: MovieRepository? ){
+
 
     fun registerCinema(): List<CinemaMovieDto> {
         val movies = movieRepository!!.findAll()
@@ -85,7 +85,7 @@ class CinemaMovieService {
     }
 
     fun read(movieId: Long?): MovieListDto? {
-        val cinemaMovieList = cinemaMovieRepository!!.findByMovie_MovieId(movieId)
+        val cinemaMovieList = cinemaMovieRepository.findByMovie_MovieId(movieId)
 
         val infoDto: MutableList<CinemaMovieDto> = ArrayList()
         if (cinemaMovieList != null) {
