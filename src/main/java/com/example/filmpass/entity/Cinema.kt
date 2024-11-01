@@ -12,14 +12,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 @EntityListeners(
     AuditingEntityListener::class
 )
-    class Cinema(id: Long?, cinemaName: String?, seatRow: Int, seatCol: Int) {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val cinemaId: Long? = null
-
-    var cinemaName: String? = null
-
-    var seatRow = 0
-
-    var seatCol = 0
-}
+    class Cinema( @Id
+                  @GeneratedValue(strategy = GenerationType.IDENTITY)
+                  val cinemaId: Long? = null,
+                  var cinemaName: String?,
+                  var seatRow: Int,
+                  var seatCol: Int
+    )
