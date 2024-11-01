@@ -27,17 +27,19 @@ public class CinemaMovie {
     @JoinColumn(name = "movie_id")
     public Movie movie;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_id")
-    private Cinema cinema;
+    public Cinema cinema;
 
     @OneToMany(mappedBy = "cinemaMovie")
-    private List<Seat> seat  = new ArrayList<>();
+    List<Seat> seat  = new ArrayList<>();
 
-    private LocalDate screenDate;
+    LocalDate screenDate;
 
-    private LocalTime screenTime;
+    LocalTime screenTime;
 
-    private LocalTime showTime;
+    LocalTime showTime;
 
 }
+
