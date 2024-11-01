@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long seatId;
+    public Long seatId;
 
     private int seatRow;
 
@@ -29,6 +29,6 @@ public class Seat {
     @JoinColumn(name = "cinema_movie_id")
     private CinemaMovie cinemaMovie;
 
-    private boolean isReserved;
+    public boolean isReserved;
 
 }

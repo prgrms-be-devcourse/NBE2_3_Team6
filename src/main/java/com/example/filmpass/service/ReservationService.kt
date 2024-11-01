@@ -14,24 +14,25 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class ReservationService {
-    private val reservationRepository: ReservationRepository? = null
-    private val seatRepository: SeatRepository? = null
-    private val cinemaMovieRepository: CinemaMovieRepository? = null
-    private val memberRepository: MemberRepository? = null
+class ReservationService (
+    private val reservationRepository: ReservationRepository,
+    private val seatRepository: SeatRepository,
+    private val cinemaMovieRepository: CinemaMovieRepository,
+    private val memberRepository: MemberRepository){
 
     //예매 등록
     fun create(reservationDto: ReservationDto): ReservationDto {
-        val seat = seatRepository!!.findById(reservationDto.seatId)
+
+        val seat = seatRepository.findById(reservationDto.seatId)
             .orElseThrow<EntityNotFoundException> { EntityNotFoundException("해당 좌석이 없습니다") }
 
-        val cinemaMovie = cinemaMovieRepository!!.findById(reservationDto.cinemaMovieId)
+        val cinemaMovie = cinemaMovieRepository.findById(reservationDto.cinemaMovieId)
             .orElseThrow<EntityNotFoundException> { EntityNotFoundException("해당 영화가 없습니다") }
 
-        val member = memberRepository!!.findById(reservationDto.userId)
+        val member = memberRepository.findById(reservationDto.userId)
             .orElseThrow<EntityNotFoundException> { EntityNotFoundException("해당 회원이 없습니다") }
 
-        val error = reservationRepository!!.findBySeatSeatId(seat.seatId)
+        val error = reservationRepository.findBySeatSeatId(seat.seatId)
 
         require(!error!!.isPresent) { "이미 등록된 좌석입니다" }
 
@@ -51,14 +52,14 @@ class ReservationService {
 
     //예매 조회
     fun read(reservationId: Long): ReservationReadDto {
-        val reservation = reservationRepository!!.findById(reservationId).orElseThrow()!!
+        val reservation = reservationRepository.findById(reservationId).orElseThrow()!!
         return ReservationReadDto(reservation)
     }
 
     fun remove(reservationId: Long) {
-        val reservation = reservationRepository!!.findById(reservationId).orElseThrow()!!
+        val reservation = reservationRepository.findById(reservationId).orElseThrow()!!
 
-        val seat = seatRepository!!.findById(reservation.seat!!.seatId)
+        val seat = seatRepository.findById(reservation.seat!!.seatId)
             .orElseThrow { EntityNotFoundException("해당 좌석이 없습니다") }
         seat.isReserved = false
         seatRepository.save(seat)
