@@ -7,6 +7,7 @@ import com.example.filmpass.entity.Movie
 import com.example.filmpass.repository.MovieRepository
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.reactive.function.client.WebClient
@@ -162,6 +163,32 @@ class MovieService(
             print("ERROR: Error while parsing movie details JSON, ${e.message}")
             null
         }
+    }
+
+    fun updateDailyBoxOfficeWithDetails(apiKey: String, targetDate: String): List<DailyBoxOfficeDto> {
+        val dailyBoxOfficeList = getDailyBoxOffice(apiKey, targetDate)
+
+        dailyBoxOfficeList.forEach { dailyBoxOfficeDto ->
+            dailyBoxOfficeDto.movieCd?.let { movieCd ->
+                if (!movieRepository.existsByMovieCd(movieCd)) {
+                    log.info("Movie with movieCd $movieCd does not exist in DB, fetching details.")
+                    val movie = getMovieInfo(movieCd)
+
+                    movie?.let {
+                        movieRepository.save(it)
+                        log.info("Saved movie to DB: $movie")
+                        movie.directorName?.let { directorName ->
+                            updateMovieWithPosterAndPlot(movie, directorName)
+                        } ?: log.warn("WARN: Director name is null for movieCd $movieCd")
+                    }
+                } else {
+                    log.warn("Movie with movieCd $movieCd already exists in DB")
+                }
+            }
+        }
+
+        log.info("daily box office movies updated with poster and plot")
+        return dailyBoxOfficeList
     }
 
     fun getMovieInfo(movieCd: String): Movie? {
