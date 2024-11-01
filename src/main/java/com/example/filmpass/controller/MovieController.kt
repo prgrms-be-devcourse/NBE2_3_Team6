@@ -4,6 +4,7 @@ import com.example.filmpass.dto.DailyBoxOfficeDto
 import com.example.filmpass.entity.Movie
 import com.example.filmpass.repository.MovieRepository
 import com.example.filmpass.service.MovieService
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.slf4j.Logger
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
@@ -12,8 +13,7 @@ import java.time.format.DateTimeFormatter
 @RestController
 class MovieController(
     private val movieService: MovieService,
-    private val movieRepository: MovieRepository,
-    private val log: Logger
+    private val movieRepository: MovieRepository
 ) {
     private val apiKey = "236d4a6e256fa76f35804ceacdf28c39"
 
