@@ -1,10 +1,7 @@
 package com.example.filmpass.dto
 
-import lombok.Getter
-import lombok.Setter
+import org.springframework.web.multipart.MultipartFile
 
-@Getter
-@Setter
-class MemberUpdateDto {
-    public val image: String? = null // 변경할 프로필 사진
-}
+data class MemberUpdateDto(
+    var image: MultipartFile? // 변경할 프로필 사진 파일
+)
