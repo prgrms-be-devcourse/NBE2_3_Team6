@@ -32,12 +32,12 @@ class ReservationService (
         val member = memberRepository.findById(reservationDto.userId)
             .orElseThrow<EntityNotFoundException> { EntityNotFoundException("해당 회원이 없습니다") }
 
-        val error = reservationRepository.findBySeatSeatId(seat.seatId)
+        val error = reservationRepository.findBySeatSeatId(seat?.seatId)
 
         require(!error!!.isPresent) { "이미 등록된 좌석입니다" }
 
-        if (!seat.isReserved) {
-            seat.isReserved = true
+        if (!seat?.isReserved!!) {
+            seat?.isReserved = true
             seatRepository.save(seat)
         } else {
             throw IllegalStateException("이미 예매된 좌석")
@@ -61,7 +61,7 @@ class ReservationService (
 
         val seat = seatRepository.findById(reservation.seat!!.seatId)
             .orElseThrow { EntityNotFoundException("해당 좌석이 없습니다") }
-        seat.isReserved = false
+        seat?.isReserved = false
         seatRepository.save(seat)
 
         reservationRepository.delete(reservation)
