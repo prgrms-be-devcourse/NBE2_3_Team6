@@ -1,10 +1,10 @@
 plugins {
-	java
+	id("java")
 	id("org.springframework.boot") version "3.3.4"
 	id("io.spring.dependency-management") version "1.1.6"
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
-	kotlin("plugin.jpa") version "1.9.25"
+	id("org.jetbrains.kotlin.jvm") version "1.9.25"
+	id("org.jetbrains.kotlin.plugin.spring") version "1.9.25"
+	id("org.jetbrains.kotlin.plugin.jpa") version "1.9.25"
 }
 
 group = "com.example"
@@ -45,8 +45,8 @@ dependencies {
 
 	// JWT 라이브러리 추가
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-	implementation("io.jsonwebtoken:jjwt-impl:0.11.5") // 추가
-	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5") // 필요에 따라 추가
+	implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
 	// JUnit 5 의존성 추가
 	testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
@@ -55,6 +55,7 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
+	// JSON 관련 라이브러리
 	implementation("org.json:json:20210307")
 
 	// json-simple 의존성

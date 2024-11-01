@@ -1,16 +1,15 @@
 package com.example.filmpass.entity
 
 import jakarta.persistence.*
-import lombok.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "movie")
-@EntityListeners(
-    AuditingEntityListener::class
-)
-data class Movie (
-    //영화 상세 정보 API에 있는 내용들과 비교해서 수정하기
+@EntityListeners(AuditingEntityListener::class)
+class Movie(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val movieId: Long? = null,
@@ -23,19 +22,34 @@ data class Movie (
 
     val directorName: String? = null,
 
-    val ageRating: String? = null,//관람등급
+    val ageRating: String? = null,  // 관람 등급
 
     val movieRating: Double = 0.0,
 
-    val showTm: String? = null, //러닝타임
+    val showTm: String? = null,     // 러닝 타임
 
-    val openDt: String? = null, //개봉년도
+    val openDt: String? = null,     // 개봉 연도
 
-    @Lob // 이 어노테이션을 추가하여 plot을 TEXT로 처리
-    @Column(columnDefinition = "TEXT") // 명시적으로 TEXT 타입 설정
-    var plot: String? = null, //줄거리
-
-    @Lob // 이 어노테이션을 추가하여 plot을 TEXT로 처리
+    @Lob
     @Column(columnDefinition = "TEXT")
-    var poster: String? = null
-)
+    var plot: String? = null,       // 줄거리
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    var poster: String? = null      // 포스터 이미지 URL
+) {
+    // 기본 생성자 추가
+    constructor() : this(
+        movieId = null,
+        movieCd = null,
+        movieName = null,
+        movieNameEN = null,
+        directorName = null,
+        ageRating = null,
+        movieRating = 0.0,
+        showTm = null,
+        openDt = null,
+        plot = null,
+        poster = null
+    )
+}
