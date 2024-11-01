@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequiredArgsConstructor
 @RequestMapping("/cinema")
 @Log4j2
-class CinemaController(private val cinemaService: CinemaService) {
+class CinemaController {
+    private val cinemaService: CinemaService? = null
 
     //    {
     //        "cinemaName": "5번 상영관",
@@ -29,6 +30,6 @@ class CinemaController(private val cinemaService: CinemaService) {
     //상영관 조회
     @GetMapping
     fun read(): ResponseEntity<List<CinemaDto>> {
-        return ResponseEntity.ok(cinemaService.read())
+        return ResponseEntity.ok(cinemaService!!.read())
     }
 }
