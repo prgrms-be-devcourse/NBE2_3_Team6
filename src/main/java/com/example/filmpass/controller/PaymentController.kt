@@ -3,6 +3,7 @@ package com.example.filmpass.controller
 import com.example.filmpass.dto.PaymentDTO
 import com.example.filmpass.dto.RefundDTO
 import com.example.filmpass.dto.ReservationDto
+import com.example.filmpass.entity.Payment
 import com.example.filmpass.service.PaymentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -36,12 +37,11 @@ class PaymentController(
 
     //결제완료 후 돌아갈 페이지
     @GetMapping("/return")
-    fun returnPage(@RequestParam("orderNo") reserveId: String?, model: Model): String {
+    fun returnPage(@RequestParam("orderNo") reserveId: String?): ResponseEntity<Payment> {
         // 결제 정보 저장하는 메소드 호출
         val apiKey = "sk_test_w5lNQylNqa5lNQe013Nq"
-        paymentService.payComplete(reserveId!!, apiKey)
-        // "paymentReturn.html" 템플릿을 반환 (src/main/resources/templates에 위치)
-        return "paymentReturn"
+        return ResponseEntity.ok(paymentService.payComplete(reserveId!!, apiKey))
+
     }
 
     @GetMapping("/cancel")

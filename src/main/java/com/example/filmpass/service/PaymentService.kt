@@ -80,7 +80,7 @@ class PaymentService (
                 jsonBody["autoExecute"] = true
                 jsonBody["resultCallback"] = ""
                 jsonBody["retUrl"] = "http://localhost:8080/paymentReturn.html"
-                jsonBody["retCancelUrl"] = "http://localhost:8080/pay/cancel"
+                jsonBody["retCancelUrl"] = "http://localhost:8080/paymentCancle.html"
 
                 val bos = BufferedOutputStream(connection.outputStream)
 
@@ -123,7 +123,7 @@ class PaymentService (
 
 
     //결제 정보 저장 메소드 - 결제 정보 불러오는 토스 API이용
-    fun payComplete(reserveId: String, apiKey: String?) {
+    fun payComplete(reserveId: String, apiKey: String?): Payment {
         var url: URL? = null
         var connection: URLConnection? = null
         val responseBody = StringBuilder()
@@ -133,34 +133,32 @@ class PaymentService (
             connection.addRequestProperty("Content-Type", "application/json")
             connection.doOutput = true
             connection.doInput = true
-            //API 사용할 때 필요한 정보 넘겨주기
+
+            // API 사용할 때 필요한 정보 넘겨주기
             val jsonBody = JSONObject()
             jsonBody["orderNo"] = reserveId
             jsonBody["apiKey"] = apiKey
 
             val bos = BufferedOutputStream(connection.getOutputStream())
-
             bos.write(jsonBody.toJSONString().toByteArray(StandardCharsets.UTF_8))
             bos.flush()
             bos.close()
-
 
             val br = BufferedReader(InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))
             var line: String? = null
             while ((br.readLine().also { line = it }) != null) {
                 responseBody.append(line)
             }
-
             br.close()
 
-            //<--- 응답받은 정보는 필요한 정보 파싱해서 entity에 저장
+            // 응답받은 정보는 필요한 정보 파싱해서 entity에 저장
             val jsonNode2 = objectMapper!!.readTree(responseBody.toString())
             val time = jsonNode2["paidTs"].asText()
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             val paidTs = LocalDateTime.parse(time, formatter)
 
             val amount = jsonNode2["amount"].asText()
-            //랜덤 값 만들었으므로 예매 번호만 뽑아내기
+            // 랜덤 값 만들었으므로 예매 번호만 뽑아내기
             val substring = reserveId.substring(0, reserveId.indexOf("m"))
 
             val reservation = reservationRepository.findByReserveId(substring.toLong())
@@ -170,26 +168,32 @@ class PaymentService (
                 payment.paidTs = paidTs
                 payment.amount = amount.toInt()
                 payment.availableRefundAmount = amount.toInt() // 초기화 추가
-                //결제 정보가 TOSS_MOENY면 현금 , CARD면 카드
-                if (jsonNode2["payMethod"].asText() === "TOSS_MONEY") {
-                    val payType = PayType.CASH
-                    payment.payType = payType
+
+                // 결제 정보가 TOSS_MONEY면 현금, CARD면 카드
+                if (jsonNode2["payMethod"].asText() == "TOSS_MONEY") {
+                    payment.payType = PayType.CASH
                 } else {
-                    val payType = PayType.CARD
-                    payment.payType = payType
+                    payment.payType = PayType.CARD
                 }
-                paymentRepository.save<Payment>(payment)
+
+                paymentRepository.save(payment) // DB에 저장
+                return payment // 정상적으로 처리된 Payment 객체 반환
             }
 
+            // 여기서는 결제 정보가 없는 경우나 예외 발생 시 기본값을 반환해야 함
+            // 예외가 발생하거나 조건에 맞는 payment가 없으면, 적절한 처리 후 반환
+            val defaultPayment = Payment()
+            defaultPayment.status = PayStatus.PAY_CANCEL  // 실패 상태로 초기화
+            return defaultPayment // 기본값 반환
 
-
-            //---->
-
-            //Payment DB에 저장
         } catch (e: Exception) {
-            responseBody.append(e)
+            // 예외 처리, 에러 메시지를 응답에 기록하고 기본값 반환
+            println("Error: ${e.message}")
+
+            val defaultPayment = Payment()
+            defaultPayment.status = PayStatus.PAY_CANCEL  // 실패 상태로 초기화
+            return defaultPayment // 예외 발생 시 기본값 반환
         }
-        println(responseBody.toString())
     }
 
 
