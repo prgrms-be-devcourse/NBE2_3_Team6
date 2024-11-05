@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 완료</title>
+    <script>
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderNo = urlParams.get('orderNo');
+            fetch(`http://localhost:8080/pay/return?orderNo=${orderNo}`, {
+                method: 'GET',  // HTTP 메서드 (GET)
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    return "결제 성공"; // 응답이 성공적일 경우 JSON 반환
+                } else {
+                    throw new Error('결제 처리에 실패했습니다.');
+                }
+            }).then(data => {
+                console.log('결제 처리 성공:', data);
+            }).catch(error => {
+                console.error('결제 처리 오류:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+<h1>결제가 완료되었습니다!</h1>
+<p>주문 번호: <span th:text="${orderNo}"></span></p>
+<p>결제가 완료되었습니다.</p>
+</body>
+</html>

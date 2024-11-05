@@ -79,7 +79,7 @@ class PaymentService (
                 jsonBody["apiKey"] = "sk_test_w5lNQylNqa5lNQe013Nq"
                 jsonBody["autoExecute"] = true
                 jsonBody["resultCallback"] = ""
-                jsonBody["retUrl"] = "http://localhost:8080/pay/return"
+                jsonBody["retUrl"] = "http://localhost:8080/paymentReturn.html"
                 jsonBody["retCancelUrl"] = "http://localhost:8080/pay/cancel"
 
                 val bos = BufferedOutputStream(connection.outputStream)
