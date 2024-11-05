@@ -1,83 +1,88 @@
-package com.example.filmpass.service;
+package com.example.filmpass.service
 
-import edu.example.restz.dto.*;
-import edu.example.restz.entity.Review;
-import edu.example.restz.exception.ReviewException;
-import edu.example.restz.repository.ReviewRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.filmpass.dto.ReviewDTO
+import com.example.filmpass.dto.ReviewPageRequestDTO
+import com.example.filmpass.entity.Movie
+import com.example.filmpass.entity.Review
+import com.example.filmpass.repository.MovieRepository
+import com.example.filmpass.repository.ReviewRepository
+import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-@RequiredArgsConstructor
 @Transactional
-@Log4j2
-public class ReviewService {
-    private final ReviewRepository reviewRepository;
+class ReviewService (
+    private val reviewRepository: ReviewRepository,
+    private val movieRepository: MovieRepository
+){
 
-    public ReviewDTO register(ReviewDTO reviewDTO){   //등록
-        try {
-            Review review = reviewDTO.toEntity();
-            reviewRepository.save(review);
-            return new ReviewDTO(review);
-        } catch (DataIntegrityViolationException e){
-            throw ReviewException.PRODUCT_NOT_FOUND.get();
-        } catch(Exception e) {
-            log.error("--- e : " + e);
-            log.error("--- " + e.getMessage()); //에러 로그로 발생 예외의 메시지를 기록하고
-            throw ReviewException.NOT_REGISTERED.get();
-        }
+    fun register(reviewDTO: ReviewDTO): ReviewDTO {   //등록
+        val movieId = reviewDTO.movieId ?: throw IllegalArgumentException("영화가 없습니다")
+        val movie: Movie? = movieRepository.findById(movieId)
+            .orElseThrow { EntityNotFoundException("해당 영화가 없습니다") }
+        val review = reviewDTO.toEntity(movie!!)
+        reviewRepository.save(review)
+        return ReviewDTO(
+            reviewId = review.reviewId,
+            content = review.content,
+            reviewer = review.reviewer,
+            rating = review.rating,
+            regDate = review.regDate,
+            modDate = review.modDate,
+            movieId = review.movie?.movieId)
+
     }
 
-    public ReviewDTO read(Long rno) {     //조회
-        Review review = reviewRepository.findById(rno).orElseThrow(
-                                        ReviewException.NOT_FOUND::get);
-        return new ReviewDTO(review);
+    fun read(reviewId: Long?): ReviewDTO {     //조회
+        val review: Review? = reviewRepository.findById(reviewId ?: throw IllegalArgumentException("리뷰 아이디가 없습니다."))
+            .orElseThrow { IllegalArgumentException("리뷰를 찾을 수 없습니다.") }
+        return ReviewDTO(
+            reviewId = review?.reviewId,
+            content = review?.content,
+            reviewer = review?.reviewer,
+            rating = review?.rating,
+            regDate = review?.regDate,
+            modDate = review?.modDate,
+            movieId = review?.movie?.movieId)
     }
 
-    public ReviewDTO modify(ReviewDTO reviewDTO){    //수정
-        Review review = reviewRepository.findById(reviewDTO.getRno())
-                                        .orElseThrow(
-                                                ReviewException.NOT_FOUND::get);
+    fun modify(reviewDTO: ReviewDTO): ReviewDTO {    //수정
+        val reviewId = reviewDTO.reviewId ?: throw IllegalArgumentException("Review ID is required")
+        val review: Review = reviewRepository.findById(reviewId)
+            .orElseThrow { IllegalArgumentException("리뷰를 찾을 수 없습니다") }!!
+        review.changeContent(reviewDTO.content ?: "")
+        review.changeRating(reviewDTO.rating ?: 0)
 
-        try {//필요한 부분 수정 - 변경이 감지되면 수정 처리 수행
-            review.changeContent(reviewDTO.getContent());
-            review.changeStar(reviewDTO.getStar());
-            return new ReviewDTO(review);
-        } catch(Exception e) {
-            log.error("--- " + e.getMessage());
-            throw ReviewException.NOT_MODIFIED.get();
-        }
+        reviewRepository.save(review)
+        return ReviewDTO(
+            reviewId = review.reviewId,
+            content = review.content,
+            reviewer = review.reviewer,
+            rating = review.rating,
+            regDate = review.regDate,
+            modDate = review.modDate,
+            movieId = review.movie?.movieId)
+
     }
 
     //삭제
-    public void remove(Long rno){
-        Review review = reviewRepository.findById(rno).orElseThrow(
-                                        ReviewException.NOT_FOUND::get);
+    fun remove(reviewId: Long?) {
+        val review: Review? = reviewRepository.findById(reviewId).orElseThrow { IllegalArgumentException("리뷰를 찾을 수 없습니다.")}
 
-        try {
-            reviewRepository.delete(review);
-        } catch(Exception e) {
-            log.error("--- " + e.getMessage());
-            throw ReviewException.NOT_REMOVED.get();
-        }
+        reviewRepository.delete(review)
+
     }
 
     //목록
-    public Page<ReviewDTO> getList(ReviewPageRequestDTO pageRequestDTO) {
-        try {
-            Sort sort = Sort.by("rno").ascending();
-            Pageable pageable = pageRequestDTO.getPageable(sort);
-            return reviewRepository.list(pageRequestDTO.getPno(), pageable );
-        } catch(Exception e) {
-            log.error("--- " + e.getMessage());
-            throw ReviewException.NOT_FETCHED.get();
-        }
+    fun getList(pageRequestDTO: ReviewPageRequestDTO): Page<Review>? {
+            val sort = Sort.by("movie.id").ascending()
+            val pageable: Pageable = pageRequestDTO.getPageable(sort)
+            return reviewRepository.list(pageRequestDTO.movieId, pageable)
+
     }
 }
 

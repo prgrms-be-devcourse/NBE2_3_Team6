@@ -1,39 +1,50 @@
-package com.example.filmpass.entity;
+package com.example.filmpass.entity
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
+import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Table(name = "review")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Review {
-
+@EntityListeners(
+    AuditingEntityListener::class
+)
+data class Review(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long review_id;
+    val reviewId: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
-    private Movie movie;
+    val movie: Movie? = null,
 
     @Column(nullable = false)
-    private String content;
+    var reviewer: String? = null,
 
     @Column(nullable = false)
-    private int rating;
+    var content: String? = null,
+
+    @Column(nullable = false)
+    var rating: Int? = 0,
 
     @CreatedDate
-    private LocalDateTime regDate;
+    var regDate: LocalDateTime? = null,
 
     @LastModifiedDate
-    private LocalDateTime modDate;
+    var modDate: LocalDateTime? = null
+
+
+){
+    fun changeContent(newContent: String) {
+    this.content = newContent
+        this.modDate = LocalDateTime.now()
+}
+
+    fun changeRating(newRating: Int) {
+        this.rating = newRating
+        this.modDate = LocalDateTime.now()
+    }
 }
