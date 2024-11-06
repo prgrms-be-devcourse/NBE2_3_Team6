@@ -51,7 +51,6 @@ class MemberService(
             image = memberSignupDto.image ?: "default_image.png"
             role = memberSignupDto.role ?: "USER"
         }
-
         memberRepository.save(member)
     }
 
@@ -81,6 +80,7 @@ class MemberService(
         }
     }
 
+    // 이미지 화면 구현 기능 추후 추가하자
     // 이미지 파일 저장
     fun saveProfileImage(imageFile: MultipartFile): String {
         // 파일 이름 생성 (UUID 사용)

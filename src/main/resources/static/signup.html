@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인</title>
+    <title>회원가입</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
             margin: 0;
             padding: 20px;
         }
-        h2 {
+        h1 {
             text-align: center;
             color: #333;
         }
@@ -46,39 +46,36 @@
 </head>
 <body>
 
-<!-- 로그인 페이지 -->
-<h2>로그인</h2>
-<form id="loginForm">
+<h1>회원가입</h1>
+<form id="signupForm">
     <input type="text" name="id" placeholder="ID" required>
     <input type="password" name="password" placeholder="비밀번호" required>
-    <button type="submit">로그인</button>
+    <input type="email" name="email" placeholder="이메일" required>
+    <input type="text" name="number" placeholder="전화번호" required>
+    <button type="submit">회원가입</button>
 </form>
 
 <script>
-    // 로그인 폼 제출 처리
-    document.getElementById("loginForm").onsubmit = async (e) => {
+    document.getElementById("signupForm").onsubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const response = await fetch('/member/login', {
+        const response = await fetch('/member/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(Object.fromEntries(formData)) // FormData를 JSON으로 변환하여 요청 전송
+            body: JSON.stringify({
+                id: formData.get('id'),
+                password: formData.get('password'),
+                email: formData.get('email'),
+                number: formData.get('number')
+            })
         });
-
         if (response.ok) {
-            const jsonResponse = await response.json(); // JSON 응답 받기
-            const accessToken = jsonResponse.accessToken;
-            const refreshToken = jsonResponse.refreshToken;
-
-            // JWT 토큰을 쿠키에 저장 (HttpOnly, Secure 속성 제거)
-            document.cookie = `accessToken=${accessToken}; path=/;`;
-            document.cookie = `refreshToken=${refreshToken}; path=/;`;
-
-            // 로그인 후 프로필 페이지로 리디렉션
-            window.location.href = 'profile.html';
+            alert("회원가입 성공");
+            console.log("회원가입 성공 후 로그인 페이지로 리다이렉트합니다."); // 디버깅을 위한 로그
+            window.location.href = 'login.html'; // Redirect to the login page
         } else {
             const errorMessage = await response.text();
-            alert("로그인 실패: " + errorMessage); // 실패 시 메시지 표시
+            alert("회원가입 실패: " + errorMessage);
         }
     };
 </script>
