@@ -50,14 +50,14 @@ class ReservationService (
 
         val reservationDetails = """
             좌석 위치: ${seat?.seatRow}행 ${seat?.seatCol}열
-            상영 날짜: ${cinemaMovie?.screenDate ?: "알 수 없음"}
-            상영 시간: ${cinemaMovie?.screenTime ?: "알 수 없음"}
+            상영 날짜: ${cinemaMovie?.screenDate ?: "알 수 없음"}<br>
+            상영 시간: ${cinemaMovie?.screenTime ?: "알 수 없음"}<br>
         """.trimIndent()
 
         // 예매 완료 후 이메일 전송
         emailService.sendReservationConfirmation(
             to = member?.email ?: throw IllegalStateException("회원의 이메일 주소가 설정되지 않았습니다."),
-            from = "brionlee97@naver.com",  // 여기에는 실제 네이버 이메일 주소를 입력하세요
+            from = "brionlee97@naver.com", //다른 이메일로 변경 가능
             movieName = cinemaMovie?.movie?.movieName ?: "알 수 없음",
             reservationDetails = reservationDetails
         )

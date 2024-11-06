@@ -12,7 +12,7 @@ class EmailService(private val mailSender: JavaMailSender) {
         val helper = MimeMessageHelper(message, true)
 
         helper.setTo(to)
-        helper.setFrom(from)  // 발신자 주소를 명시적으로 설정
+        helper.setFrom(from)
         helper.setSubject("예매 완료 확인")
         helper.setText("""
             <h1>예매가 완료되었습니다!</h1>
