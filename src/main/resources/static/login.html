@@ -70,9 +70,9 @@
             const accessToken = jsonResponse.accessToken;
             const refreshToken = jsonResponse.refreshToken;
 
-            // JWT 토큰을 쿠키에 저장
-            document.cookie = `accessToken=${accessToken}; path=/; Secure; HttpOnly;`;
-            document.cookie = `refreshToken=${refreshToken}; path=/; Secure; HttpOnly;`;
+            // JWT 토큰을 쿠키에 저장 (HttpOnly, Secure 속성 제거)
+            document.cookie = `accessToken=${accessToken}; path=/;`;
+            document.cookie = `refreshToken=${refreshToken}; path=/;`;
 
             // 로그인 후 프로필 페이지로 리디렉션
             window.location.href = 'profile.html';

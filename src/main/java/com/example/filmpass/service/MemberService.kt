@@ -81,6 +81,7 @@ class MemberService(
         }
     }
 
+
     // 이미지 파일 저장
     fun saveProfileImage(imageFile: MultipartFile): String {
         // 파일 이름 생성 (UUID 사용)

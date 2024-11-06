@@ -35,7 +35,7 @@ class MemberController(
     fun login(
         @Valid @RequestBody memberLoginDto: MemberLoginDto,
         response: HttpServletResponse
-    ): ResponseEntity<Map<String, String>> { // 응답 타입 변경
+    ): ResponseEntity<Map<String, String>> {
         return try {
             val authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken(memberLoginDto.id, memberLoginDto.password)
@@ -43,7 +43,6 @@ class MemberController(
             val tokens = memberService.login(memberLoginDto.id!!, memberLoginDto.password!!)
             val jwtToken = tokens["accessToken"] ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("message" to "Access token is missing"))
             val refreshToken = tokens["refreshToken"] ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("message" to "Refresh token is missing"))
-
 
             // JWT 액세스 토큰을 쿠키에 저장
             val jwtCookie = Cookie("token", jwtToken)
@@ -63,6 +62,22 @@ class MemberController(
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("message" to "로그인 실패: ${e.message}"))
         }
     }
+    @PostMapping("/logout")
+    fun logout(response: HttpServletResponse): ResponseEntity<String> {
+        // 쿠키에서 토큰 제거
+        val jwtCookie = Cookie("token", null)
+        jwtCookie.maxAge = 0
+        jwtCookie.isHttpOnly = true
+        response.addCookie(jwtCookie)
+
+        val refreshCookie = Cookie("refreshToken", null)
+        refreshCookie.maxAge = 0
+        refreshCookie.isHttpOnly = true
+        response.addCookie(refreshCookie)
+
+        return ResponseEntity.ok("Logged out successfully")
+    }
+
 
 
     @PutMapping("/profile-image", consumes = ["multipart/form-data"])
