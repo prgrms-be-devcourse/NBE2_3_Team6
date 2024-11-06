@@ -60,6 +60,9 @@ dependencies {
 
 	// json-simple 의존성
 	implementation("com.googlecode.json-simple:json-simple:1.1.1")
+
+	//e-mail 의존성
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 }
 
 // Deprecated API 경고를 출력하기 위한 설정 추가
