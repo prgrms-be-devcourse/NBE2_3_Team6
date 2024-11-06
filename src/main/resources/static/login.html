@@ -73,15 +73,10 @@
             document.cookie = `accessToken=${accessToken}; path=/;`;
             document.cookie = `refreshToken=${refreshToken}; path=/;`;
 
-<<<<<<< HEAD
-            // 로그인 후 영화 예매 사이트로 리디렉션
-            window.location.href = 'http://localhost:8080/rankingMovie.html'; // Redirect to the ranking movie page
-=======
             // 로그인 성공 후 returnUrl로 리디렉션
             const urlParams = new URLSearchParams(window.location.search);
             const returnUrl = urlParams.get('returnUrl') || 'profile.html';
             window.location.href = returnUrl;
->>>>>>> b32351b101cb7822e69fa77c8156819c3c36cead
         } else {
             const errorMessage = await response.text();
             alert("로그인 실패: " + errorMessage);
