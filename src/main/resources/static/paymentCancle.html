@@ -45,11 +45,20 @@
 
 </head>
 <body>
-
 <h1>예매가 취소되었습니다.</h1>
 <div class="button-container">
 
-<button class="back-button" onclick="window.location.href='rankingMovie.html'">확인</button>
+    <button class="back-button" onclick="window.location.href='rankingMovie.html'">확인</button>
 </div>
+<script>
+    // 페이지 로드 시 결제 취소 요청을 보냄
+    window.onload = function() {
+        fetch('http://localhost:8080/pay/cancel', {
+            method: 'GET'
+        })};
+
+
+</script>
 </body>
+
 </html>

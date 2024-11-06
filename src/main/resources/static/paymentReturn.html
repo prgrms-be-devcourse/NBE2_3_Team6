@@ -82,7 +82,7 @@
     const orderNoNumber = orderNo.match(/^\d+/); // 숫자만 추출
 
 
-    // 결제 정보 조회
+    // 결제 완료
     fetch(`http://localhost:8080/pay/return?orderNo=${orderNo}`, {
         method: 'GET',
         headers: {
