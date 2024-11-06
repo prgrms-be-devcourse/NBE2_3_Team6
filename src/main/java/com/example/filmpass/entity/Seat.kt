@@ -1,6 +1,7 @@
 package com.example.filmpass.entity;
 
 import jakarta.persistence.*
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
 @Table(name = "seat")
