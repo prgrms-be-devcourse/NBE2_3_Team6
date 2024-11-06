@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 로그인 페이지 -->
+<h2>로그인</h2>
+<form id="loginForm">
+    <input type="text" name="id" placeholder="ID" required>
+    <input type="password" name="password" placeholder="비밀번호" required>
+    <button type="submit">로그인</button>
+</form>
+
+<script>
+    // 로그인 폼 제출 처리
+    document.getElementById("loginForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const response = await fetch('/member/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData)) // FormData를 JSON으로 변환하여 요청 전송
+        });
+
+        if (response.ok) {
+            const jsonResponse = await response.json(); // JSON 응답 받기
+            const accessToken = jsonResponse.accessToken;
+            const refreshToken = jsonResponse.refreshToken;
+
+            // JWT 토큰을 쿠키에 저장
+            document.cookie = `accessToken=${accessToken}; path=/; Secure; HttpOnly;`;
+            document.cookie = `refreshToken=${refreshToken}; path=/; Secure; HttpOnly;`;
+
+            // 로그인 후 프로필 페이지로 리디렉션
+            window.location.href = 'profile.html';
+        } else {
+            const errorMessage = await response.text();
+            alert("로그인 실패: " + errorMessage); // 실패 시 메시지 표시
+        }
+    };
+</script>
+
+</body>
+</html>

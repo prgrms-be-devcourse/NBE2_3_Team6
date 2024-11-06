@@ -1,3 +1,4 @@
+/*
 package com.example.filmpass.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,3 +32,4 @@ public class ReviewPageRequestDTO {
         return PageRequest.of(page - 1, size, sort);
     }
 }
+*/

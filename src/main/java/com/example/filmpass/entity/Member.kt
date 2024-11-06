@@ -29,6 +29,7 @@ class Member {
     var number: String? = null // 폰번호
 
     var image: String? = null // 프로필 사진
+    var profileImageUrl: String? = null // 프로필 이미지 URL 추가
     var role: String? = null // 권한
 
     var refreshToken: String? = null // 재생성 토큰
