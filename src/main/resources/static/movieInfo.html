@@ -69,7 +69,8 @@
             <p>상영시간: ${movie.showTm}분</p>
             <p>개봉일: ${movie.openDt}</p>
             <p>줄거리: ${movie.plot}</p>
-            <a href="screeningInfo.html?movieId=${movie.movieId}" id="reserveButton">상영 정보</a>        `;
+            <a href="screeningInfo.html?movieId=${movie.movieId}" id="reserveButton">상영 정보</a>
+            <a href="reviewList.html?movieId=${movie.movieId}" id="reviewButton">리뷰 보기</a>       `;
     }
 
     function displayScreeningInfo(screenings) {

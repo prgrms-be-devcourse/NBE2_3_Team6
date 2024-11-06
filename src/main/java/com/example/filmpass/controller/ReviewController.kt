@@ -40,10 +40,14 @@ class ReviewController(private val reviewService: ReviewService) {
     ): ResponseEntity<ReviewDTO> {
 
 
-        val inputReviewer: String = reviewDTO.reviewer.toString()
-        val dbReviewer: String = reviewService.read(reviewId).reviewer.toString()
+        val updatedReviewDTO = reviewDTO.copy(reviewId = reviewId)
 
-        return ResponseEntity.ok(reviewService.modify(reviewDTO))
+        return try {
+            val updatedReview = reviewService.modify(updatedReviewDTO)
+            ResponseEntity.ok(updatedReview)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(null)
+        }
     }
 
     //삭제 - 등록한 사용자와 ADMIN role이 있는 사용자는 삭제 가능하도록 처리
