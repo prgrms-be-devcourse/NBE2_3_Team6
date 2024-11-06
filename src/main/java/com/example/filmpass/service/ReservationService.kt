@@ -7,8 +7,6 @@ import com.example.filmpass.repository.MemberRepository
 import com.example.filmpass.repository.ReservationRepository
 import com.example.filmpass.repository.SeatRepository
 import jakarta.persistence.EntityNotFoundException
-import lombok.RequiredArgsConstructor
-import lombok.extern.log4j.Log4j2
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,7 +16,9 @@ class ReservationService (
     private val reservationRepository: ReservationRepository,
     private val seatRepository: SeatRepository,
     private val cinemaMovieRepository: CinemaMovieRepository,
-    private val memberRepository: MemberRepository){
+    private val memberRepository: MemberRepository,
+    private val emailService: EmailService
+){
 
     //예매 등록
     fun create(reservationDto: ReservationDto): ReservationDto {
@@ -44,11 +44,29 @@ class ReservationService (
         }
 
 
+
         val reservation = reservationDto.toEntity(seat, cinemaMovie, member)
         reservationRepository.save(reservation)
 
+        val reservationDetails = """
+            좌석 위치: ${seat?.seatRow}행 ${seat?.seatCol}열<br>
+            상영 날짜: ${cinemaMovie?.screenDate ?: "알 수 없음"}<br>
+            상영 시간: ${cinemaMovie?.screenTime ?: "알 수 없음"}<br>
+        """.trimIndent()
+
+        // 예매 완료 후 이메일 전송
+        emailService.sendReservationConfirmation(
+            to = member?.email ?: throw IllegalStateException("회원의 이메일 주소가 설정되지 않았습니다."),
+            from = "brionlee97@naver.com", //다른 이메일로 변경 가능
+            movieName = cinemaMovie?.movie?.movieName ?: "알 수 없음",
+            reservationDetails = reservationDetails
+        )
+
+
         return ReservationDto(reservation)
     }
+
+
 
     //예매 조회
     fun read(reservationId: Long): ReservationReadDto {

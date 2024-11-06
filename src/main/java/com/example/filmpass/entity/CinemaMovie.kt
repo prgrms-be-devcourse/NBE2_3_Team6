@@ -10,9 +10,6 @@ import java.time.LocalTime
 
 @Entity
 @Table(name = "cinema_movie")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @EntityListeners(
     AuditingEntityListener::class
 )

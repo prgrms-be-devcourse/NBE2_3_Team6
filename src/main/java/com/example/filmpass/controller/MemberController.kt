@@ -33,7 +33,7 @@ class MemberController(
     fun login(
         @Valid @RequestBody memberLoginDto: MemberLoginDto,
         response: HttpServletResponse
-    ): ResponseEntity<String> {
+    ): ResponseEntity<Map<String, String?>> {
         return try {
             val authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken(memberLoginDto.id, memberLoginDto.password)
@@ -54,10 +54,16 @@ class MemberController(
             refreshCookie.maxAge = 60 * 60 * 24 * 30 // 30일
             response.addCookie(refreshCookie)
 
-            ResponseEntity.ok("Login successful")
+            val responseBody = mapOf(
+                "message" to "Login successful",
+                "jwt" to jwtToken,
+                "refreshToken" to refreshToken
+            )
+
+            ResponseEntity.ok(responseBody)
         } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ${e.message}")
-        }
+            val errorResponse = mapOf("message" to "로그인 실패: ${e.message}")
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)        }
     }
 
     @PutMapping("/profile-image", consumes = ["multipart/form-data"])
