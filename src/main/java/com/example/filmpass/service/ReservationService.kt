@@ -49,7 +49,7 @@ class ReservationService (
         reservationRepository.save(reservation)
 
         val reservationDetails = """
-            좌석 위치: ${seat?.seatRow}행 ${seat?.seatCol}열
+            좌석 위치: ${seat?.seatRow}행 ${seat?.seatCol}열<br>
             상영 날짜: ${cinemaMovie?.screenDate ?: "알 수 없음"}<br>
             상영 시간: ${cinemaMovie?.screenTime ?: "알 수 없음"}<br>
         """.trimIndent()
