@@ -62,7 +62,10 @@
 <div class="button-container">
     <button class="back-button" onclick="window.location.href='rankingMovie.html'">확인</button>
     <button class="cancel-button" onclick="cancelReservation()">예매 취소</button>
+    <button class="cancel-button" onclick="paymentReservation()">결제 하기</button>
+
 </div>
+
 
 <script>
     // URL에서 예약 ID 가져오기
@@ -109,6 +112,35 @@
             .catch(error => {
                 console.error(error);
                 alert('예매 취소 중 문제가 발생했습니다.');
+            });
+    }
+
+    // 결제 함수
+    function paymentReservation() {
+
+        // PaymentDTO로 예매 Id 전송
+        const paymentDTO = {
+            reserveId: reservationId
+        };
+        fetch(`http://localhost:8080/pay/payments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paymentDTO) // reservationId를 포함한 PaymentDTO 전송
+        })
+            .then(response => response.json()) // JSON 응답을 받음
+            .then(data => {
+                if (data.paymentUrl && data.paymentUrl.body) {
+                    // 결제 URL을 자동으로 새 창에서 열기
+                    window.location.href = data.paymentUrl.body; // 결제 페이지로 자동 리디렉션
+                } else {
+                    throw new Error('결제 URL을 가져오지 못했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('결제 URL을 가져오는 중 문제가 발생했습니다.');
             });
     }
 </script>

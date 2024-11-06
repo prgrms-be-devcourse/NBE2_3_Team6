@@ -1,4 +1,3 @@
-/*
 package com.example.filmpass.entity;
 
 import jakarta.persistence.*;
@@ -37,4 +36,4 @@ public class Review {
 
     @LastModifiedDate
     private LocalDateTime modDate;
-}*/
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예매 완료</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .message {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .details {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #007bff;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .section p {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .back-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h1>예매가 완료 되었습니다.</h1>
+
+<div class="message">
+    <p></p>
+</div>
+
+<div class="details" id="details">
+    <!-- 예약 정보와 결제 정보가 여기에 표시됩니다. -->
+</div>
+
+<div class="button-container">
+    <button class="back-button" onclick="window.location.href='rankingMovie.html'">확인</button>
+</div>
+
+<script>
+    // URL 파라미터로 orderNo 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderNo = urlParams.get('orderNo');
+    const orderNoNumber = orderNo.match(/^\d+/); // 숫자만 추출
+
+
+    // 결제 완료
+    fetch(`http://localhost:8080/pay/return?orderNo=${orderNo}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('결제 정보를 가져오는 데 실패했습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const paymentDetails = `
+            <div class="section">
+                <p>결제 금액: ${data.amount}</p>
+                <p>결제 수단: ${data.payType}</p>
+            </div>
+        `;
+            document.getElementById('details').innerHTML += paymentDetails; // 예약 정보 뒤에 결제 정보 추가
+        })
+        .catch(error => {
+            console.error(error);
+            document.getElementById('details').innerHTML += `<p>${error.message}</p>`;
+        });
+
+    // 예약 정보 조회
+    fetch(`http://localhost:8080/reservation/${orderNoNumber[0]}`)
+        .then(response => {
+            if (!response.ok) {
+                console.error(`HTTP Error: ${response.status} ${response.statusText}`);
+                throw new Error('예약 정보를 가져오는 데 실패했습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reservationDetails = `
+            <div class="section">
+                <p>예매 번호: ${data.reservationId}</p>
+                <p>영화: ${data.cinemaMovieName}</p>
+                <p>좌석: ${data.seatId}</p>
+                <p>상영관 : ${data.cinemaName}</p>
+                <p>상영 일시: ${data.screenDateTime}</p>
+                <p>상영 시간: ${data.showTime}</p>
+                <p>성인: ${data.adult} 청소년: ${data.youth} 어린이: ${data.child}</p>
+            </div>
+        `;
+            document.getElementById('details').innerHTML += reservationDetails; // 결제 정보 뒤에 예약 정보 추가
+        })
+        .catch(error => {
+            console.error(error);
+            document.getElementById('details').innerHTML += `<p>${error.message}</p>`;
+        });
+</script>
+
+</body>
+</html>

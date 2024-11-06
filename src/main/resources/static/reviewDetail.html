@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 상세</title>
+    <style>
+        /* 기본 레이아웃 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* 리뷰 상세 영역 스타일 */
+        #reviewDetails {
+            background-color: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #reviewDetails h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #reviewDetails p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        /* 폼 스타일 */
+        form {
+            background-color: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        form input[type="text"], form textarea, form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        /* 삭제 버튼 */
+        #deleteButton {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        #deleteButton:hover {
+            background-color: #e53935;
+        }
+
+        /* 뒤로 가기 버튼 스타일 */
+        button {
+            background-color: #808080;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<h1>리뷰 상세 정보</h1>
+<div id="reviewDetails">
+    <!-- 리뷰 상세 정보가 여기에 표시됩니다. -->
+</div>
+
+<!-- 수정 폼 -->
+<h2>리뷰 수정</h2>
+<form id="editReviewForm">
+    <label for="reviewer">작성자:</label>
+    <input type="text" id="reviewer" name="reviewer" required><br><br>
+
+    <label for="content">내용:</label>
+    <textarea id="content" name="content" required></textarea><br><br>
+
+    <label for="rating">평점:</label>
+    <select id="rating" name="rating" required>
+        <option value="">평점을 선택하세요</option>
+        <option value="1">1점</option>
+        <option value="2">2점</option>
+        <option value="3">3점</option>
+        <option value="4">4점</option>
+        <option value="5">5점</option>
+    </select><br><br>
+
+    <button type="submit">수정하기</button>
+</form>
+
+<!-- 삭제 버튼 -->
+<button id="deleteButton">삭제하기</button>
+<button onclick="window.history.back()">뒤로 가기</button>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const reviewId = urlParams.get('reviewId');  // reviewId를 URL에서 가져옴
+
+    async function fetchReviewDetails() {
+        try {
+            const response = await fetch(`http://localhost:8080/review/${reviewId}`);
+            if (!response.ok) {
+                throw new Error('리뷰 정보를 가져오는 데 실패했습니다.');
+            }
+            const review = await response.json();
+            displayReviewDetails(review);
+            populateEditForm(review);
+        } catch (error) {
+            console.error('Error fetching review details:', error);
+        }
+    }
+
+    function displayReviewDetails(review) {
+        const reviewDetails = document.getElementById('reviewDetails');
+        reviewDetails.innerHTML = `
+            <h2>${review.reviewer}의 리뷰</h2>
+            <p>내용: ${review.content}</p>
+            <p>평점: ${review.rating}점</p>
+        `;
+    }
+
+    function populateEditForm(review) {
+        document.getElementById('reviewer').value = review.reviewer;
+        document.getElementById('content').value = review.content;
+        document.getElementById('rating').value = review.rating;
+    }
+
+    document.getElementById('editReviewForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const updatedReview = {
+            content: document.getElementById('content').value,
+            reviewer: document.getElementById('reviewer').value,
+            rating: parseInt(document.getElementById('rating').value, 10)
+        };
+
+        try {
+            // PUT 요청에서 reviewId를 URL에 포함시켜야 합니다.
+            const response = await fetch(`http://localhost:8080/review/${reviewId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedReview)
+            });
+
+            if (!response.ok) {
+                throw new Error('리뷰 수정에 실패했습니다.');
+            }
+
+            alert('리뷰가 성공적으로 수정되었습니다!');
+            fetchReviewDetails(); // 수정 후 다시 로드
+        } catch (error) {
+            console.error('Error updating review:', error);
+            alert('리뷰 수정 중 오류가 발생했습니다.');
+        }
+    });
+
+    document.getElementById('deleteButton').addEventListener('click', async () => {
+        if (!confirm('정말로 삭제하시겠습니까?')) return;
+
+        try {
+            const response = await fetch(`http://localhost:8080/review/${reviewId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('리뷰 삭제에 실패했습니다.');
+            }
+
+            alert('리뷰가 삭제되었습니다.');
+            window.history.back(); // 삭제 후 뒤로 가기
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            alert('리뷰 삭제 중 오류가 발생했습니다.');
+        }
+    });
+
+    fetchReviewDetails();  // 페이지 로드 시 리뷰 상세 정보 가져오기
+</script>
+
+</body>
+</html>

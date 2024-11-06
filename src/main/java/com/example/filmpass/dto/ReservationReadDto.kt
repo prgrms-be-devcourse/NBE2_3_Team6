@@ -2,11 +2,9 @@ package com.example.filmpass.dto
 
 import com.example.filmpass.entity.Reservation
 import com.fasterxml.jackson.annotation.JsonInclude
-import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Data
-import lombok.NoArgsConstructor
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -18,7 +16,10 @@ data class ReservationReadDto(
     val reservationId: Long?,
     val adult: Int,
     val child: Int,
-    val youth: Int
+    val youth: Int,
+    val showTime: LocalTime?,
+    val screenDateTime: LocalDate?,
+    val cinemaName: String?
 ) {
     constructor(reservation: Reservation) : this(
         userId = reservation.member!!.memberId,
@@ -28,6 +29,10 @@ data class ReservationReadDto(
         reservationId = reservation.reserveId,
         adult = reservation.adult,
         child = reservation.child,
-        youth = reservation.youth
+        youth = reservation.youth,
+        showTime = reservation.cinemaMovie?.showTime,
+        screenDateTime = reservation.cinemaMovie?.screenDate,
+        cinemaName = reservation.cinemaMovie?.cinema?.cinemaName
     )
+
 }
